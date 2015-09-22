@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>JoulePerSecond.com</title>
+
+<meta charset="utf-8">
+<!-- <link href='http://fonts.googleapis.com/css?family=Lato:100,300,400,700,100italic,300italic,400italic' rel='stylesheet' type='text/css'> -->
+<link rel='stylesheet' href='http://joulepersecond.com/css/style.css' type='text/css' media='all' />
+<!-- Bootstrap -->
+<link href="http://joulepersecond.com/bootstrap-3.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link rel='stylesheet' href='http://joulepersecond.com/css/light.css' type='text/css' media='all' />
+<link rel='stylesheet' href='http://joulepersecond.com/includes/colors.php' type='text/css' media='all' />
+<link href="http://joulepersecond.com/bootstrap-3.3.2/css/bootstrap-theme.css" rel="stylesheet">
+
+<script src="//use.typekit.net/mbs5qua.js"></script>
+<script>try{Typekit.load();}catch(e){}</script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script src="http://joulepersecond.com/js/highcharts/highcharts.js"></script>
+<script src="http://joulepersecond.com/js/highcharts/highcharts-more.js"></script>
+<script src="http://joulepersecond.com/js/highcharts/modules/solid-gauge.src.js"></script>
+<script src="http://joulepersecond.com/js/highcharts/highcharts-regression.js"></script>
+
+<script src="http://joulepersecond.com/js/highcharts/modules/exporting.js"></script>
+
+<script src="http://joulepersecond.com/js/highcharts/themes/jps-{{.Settings.Theme}}.js"></script>
+<script src="http://joulepersecond.com/bootstrap-3.3.2/js/bootstrap.min.js"></script>
+<script>var enc_user_id = "{{.Settings.EncId}}"; </script>
+<script>
+var selectedCP = '';
+
+{{if .Filter.S5}}selectedCP = '5sec'; {{end}}
+{{if .Filter.S20}}selectedCP = '20sec'; {{end}}
+{{if .Filter.S60}}selectedCP = '60sec'; {{end}}
+{{if .Filter.S300}}selectedCP = '5min'; {{end}}
+{{if .Filter.S1200}}selectedCP = '20min'; {{end}}
+{{if .Filter.S3600}}selectedCP = '60min'; {{end}}
+
+var linecolors;
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    if('{{.Settings.Theme}}' == 'gray'){
+        linecolors = ["#5A5A5D", "#8D3638", "#D90000"];
+        powersymbol = "url(http://joulepersecond.com/images/PowerIcon-small-gray.png)";
+        color1 = 2;
+        color2 = 0;
+        stopOpacity = 0.5;
+    }else{
+        linecolors = ["#6DD300", "#fb4b02", "#666"];
+        powersymbol = "url(http://joulepersecond.com/images/PowerIcon-small.png)";
+        color1 = 3;
+        color2 = 1;//taken from the array of colors in the highcharts themes
+        stopOpacity = 0.25;
+    }
+</script>
+
+
+{{if .Filter.ShowMmp}}
+<script type="text/javascript">
+    
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var textcolor = '#999';
+        var gridlinecolor ='#ddd';
+        var bgcol = "transparent";//#333
+        var expVal = 0.3;
+   
+        var cp_chart_data = new google.visualization.DataTable();
+
+        cp_chart_data.addColumn('number', 'Time');
+        cp_chart_data.addColumn('number', '{{.CpLegend1}}');
+        cp_chart_data.addColumn({type: 'string', role: 'tooltip', 'p': {'html': true}});
+        cp_chart_data.addColumn('number', '{{.CpLegend2}}');
+        cp_chart_data.addColumn({type: 'string', role: 'tooltip', 'p': {'html': true}});
+        cp_chart_data.addColumn('number', '{{.CpLegend3}}');
+        cp_chart_data.addColumn({type: 'string', role: 'tooltip', 'p': {'html': true}});
+
+        cp_chart_data.addRows([
+            {{range $cprow := .CpData}}
+                    [Math.pow({{$cprow.CpTime}}, expVal), 
+                    {{$cprow.CpPower1}},
+                    "<span class=cp-num style=background-color:"+ linecolors[0] +";>" + ({{$cprow.CpPower1}}).toString()+"</span>&nbsp;Watts&nbsp;on&nbsp;"+{{$cprow.CpLabel1}}+"<br>"+
+                    "<span class=cp-num style=background-color:"+ linecolors[1] +";>" + ({{$cprow.CpPower2}}).toString()+"</span>&nbsp;Watts&nbsp;on&nbsp;"+{{$cprow.CpLabel2}}+"<br>"+
+                    "<span class=cp-num style=background-color:"+ linecolors[2] +";>" + ({{$cprow.CpPower3}}).toString()+"</span>&nbsp;Watts&nbsp;on&nbsp;"+{{$cprow.CpLabel3}},
+                    {{$cprow.CpPower2}},
+                    "<span class=cp-num style=background-color:"+ linecolors[0] +";>" + ({{$cprow.CpPower1}}).toString()+"</span>&nbsp;Watts&nbsp;on&nbsp;"+{{$cprow.CpLabel1}}+"<br>"+
+                    "<span class=cp-num style=background-color:"+ linecolors[1] +";>" + ({{$cprow.CpPower2}}).toString()+"</span>&nbsp;Watts&nbsp;on&nbsp;"+{{$cprow.CpLabel2}}+"<br>"+
+                    "<span class=cp-num style=background-color:"+ linecolors[2] +";>" +  ({{$cprow.CpPower3}}).toString()+"</span>&nbsp;Watts&nbsp;on&nbsp;"+{{$cprow.CpLabel3}},
+                    {{$cprow.CpPower3}},
+                    "<span class=cp-num style=background-color:"+ linecolors[0] +";>" + ({{$cprow.CpPower1}}).toString()+"</span>&nbsp;Watts&nbsp;on&nbsp;"+{{$cprow.CpLabel1}}+"<br>"+
+                    "<span class=cp-num style=background-color:"+ linecolors[1] +";>" + ({{$cprow.CpPower2}}).toString()+"</span>&nbsp;Watts&nbsp;on&nbsp;"+{{$cprow.CpLabel2}}+"<br>"+
+                    "<span class=cp-num style=background-color:"+ linecolors[2] +";>" + ({{$cprow.CpPower3}}).toString()+"</span>&nbsp;Watts&nbsp;on&nbsp;"+{{$cprow.CpLabel3}}],
+            {{end}}
+        ]);
+
+        var cp_options = {
+            fontName: 'proxima-nova',
+            curveType: 'function',
+            titleTextStyle:{
+                color: "#fb4b02",
+                fontSize: 16,
+                bold: false,
+            },
+            fontSize: '10',
+            hAxis: {gridlines: {color: gridlinecolor}, textStyle:{color:textcolor, bold:true}, minValue:1,textPosition: 'out', baselineColor: 'transparent',
+                ticks: [
+                    {v:Math.pow(5,expVal), f:'5s'},
+                    {v:Math.pow(20,expVal), f:'20s'},
+                    {v:Math.pow(60,expVal), f:'1m'},
+                    {v:Math.pow(60*5,expVal), f:'5m'},
+                    {v:Math.pow(60*20,expVal), f:'20m'},
+                    {v:Math.pow(60*60,expVal), f:'1h'},
+                    {v:Math.pow(60*60*2,expVal), f:'2h'},
+                    {v:Math.pow(60*60*3,expVal), f:'3h'},
+                    {v:Math.pow(60*60*5,expVal), f:'5h'}
+                ]
+            },
+            vAxis: {logScale: true, textStyle:{color:textcolor, bold:true}, gridlines: {color: gridlinecolor}, minValue:0, textPosition: 'out', baselineColor: '#666',
+                ticks: [
+                    {v:100, f:'100w'},
+                    {v:200, f:'200w'},
+                    {v:300, f:'300w'},
+                    {v:400, f:'400w'},
+                    {v:500, f:'500w'},
+                    {v:700, f:'700w'},
+                    {v:1000, f:'1000w'}
+                ]
+            },
+            lineWidth:2,
+            colors: linecolors,
+            /*theme:'maximized',*/
+            backgroundColor:{fill: bgcol, stroke:'#66635e'},
+            explorer: { actions: ['dragToZoom', 'rightClickToReset'], keepInBounds: true },
+            crosshair: { trigger: 'both', color: 'gray', opacity: 0.5 }, // Display crosshairs on focus and selection
+            chartArea: {width: '90%', height: '84%'},
+            legend: {textStyle:{color:textcolor}, position: 'bottom'},
+            tooltip:{textStyle:{fontSize:16}, trigger: 'focus', isHtml:true}
+        };
+        var cp_chart = new google.visualization.LineChart(document.getElementById('cpc_chart'));
+        cp_chart.draw(cp_chart_data, cp_options);
+
+      }
+    </script>
+
+{{end}}
+<style>
+    .cp-num{
+        padding: 0 2px; 
+        text-align:center; 
+        border-radius: 3px; 
+        border: 1px black solid; 
+        font-weight:bold;
+    }
+</style>
+
+
+<script type="text/javascript">
+
+$(function () {
+
+    {{if .Filter.ShowTss}}
+    /**
+    *
+    * Training fatigue graph
+    * 
+    **/
+
+    $('#ff-graph').highcharts({
+        colors: linecolors,
+        chart: {
+            zoomType: 'x',
+            alignTicks: false
+        },
+        title: {
+            text: ''
+        },
+        subtitle: {
+            text: document.ontouchstart === undefined ?
+                    'Click and drag in the plot area to zoom in' :
+                    'Pinch the chart to zoom in'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            area: {
+                fillColor: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+                    stops: [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                },
+                marker: {
+                    //radius: 2
+                    enabled: false
+                },
+                lineWidth: 1,
+                states: {
+                    hover: {
+                        lineWidth: 1
+                    }
+                },
+                threshold: null
+            },
+
+        },
+
+        xAxis: {
+            type: 'datetime',
+            title: {
+                text: 'Date'
+            },
+            min: null
+        },
+        yAxis: [{ // Primary yAxis
+            title: {
+                text: 'CTL/ATL'
+            },
+            floor: 0,
+            ceiling: 100,
+            min: 0,
+            max:100,
+            endOnTick: false,
+            startOnTick: false,
+            min: null
+        }, { // Secondary yAxis
+            title: {
+                text: 'TSB',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            floor: -50,
+            ceiling: 50,
+            min: -50,
+            max:50,
+            endOnTick: false,
+            startOnTick: false,
+            labels: {
+                format: '{value}',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            opposite:{{if .Filter.ShowCPs}}false{{else}}true{{end}}
+        }
+        {{if .Filter.ShowCPs}}
+        , { // secondary yAxis
+            title: {
+                text: 'Power (Watts)',
+            },
+            opposite: true
+        }
+        {{end}}
+        ],
+
+        tooltip: {
+            headerFormat: '<b>{series.name}</b><br>',
+            pointFormat: '{point.x:%e. %b}: {point.y:.2f}',
+            crosshairs: [false, true]
+        },
+
+        series: [{
+            type: 'column',
+            color: '#dddddd',
+            name: 'Perceived Effort',
+            marker: {
+                    enabled: false
+            },
+            data: [
+                {{range $ffdata := .FfData}}[Date.UTC({{$ffdata.Year}},{{$ffdata.Month}},{{$ffdata.Day}}),{{$ffdata.Meta.PerceivedEffort}}*20],{{end}}
+            ]
+        }, {
+            type: 'column',
+            color: '#eeeeee',
+            name: 'Motivation Level',
+            marker: {
+                    enabled: false
+            },
+            data: [
+                {{range $ffdata := .FfData}}[Date.UTC({{$ffdata.Year}},{{$ffdata.Month}},{{$ffdata.Day}}),{{$ffdata.Meta.MotivationLevel}}*20],{{end}}
+            ]
+        },{
+            type: 'area',
+            name: 'TSB',
+            yAxis: 1,
+            marker: {
+                    enabled: false
+            },
+            fillColor: {
+                linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+                stops: [
+                    [0, Highcharts.Color(Highcharts.getOptions().colors[color1]).setOpacity(stopOpacity).get('rgba')],
+                    [1, Highcharts.Color(Highcharts.getOptions().colors[color1]).setOpacity(0).get('rgba')]
+                ]
+            },
+            // Define the data points. All series have a dummy year
+            // of 1970/71 in order to be compared on the same x axis. Note
+            // that in JavaScript, months start at 0 for January, 1 for February etc.
+            data: [
+                {{range $ffdata := .FfData}}[Date.UTC({{$ffdata.Year}},{{$ffdata.Month}},{{$ffdata.Day}}),{{$ffdata.Tsb}}],{{end}}
+            ]
+        }, {
+            type: 'area',
+            fillColor: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+                    stops: [
+                        [0, Highcharts.Color(Highcharts.getOptions().colors[color2]).setOpacity(stopOpacity).get('rgba')],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[color2]).setOpacity(0).get('rgba')]
+                    ]
+                },
+            name: 'ATL',
+            marker: {
+                    enabled: false
+            },
+            data: [
+                {{range $ffdata := .FfData}}[Date.UTC({{$ffdata.Year}},{{$ffdata.Month}},{{$ffdata.Day}}),{{$ffdata.Atl}}],{{end}}
+            ]
+        }, {
+            type: 'line',
+            name: 'CTL',
+            marker: {
+                    enabled: false
+            },
+            data: [
+                {{range $ffdata := .FfData}}[Date.UTC({{$ffdata.Year}},{{$ffdata.Month}},{{$ffdata.Day}}),{{$ffdata.Ctl}}],{{end}}
+            ]
+        }
+        {{if .Filter.ShowCPs}}
+        , {
+            type: 'scatter',
+            name: 'Notable Critial Power Performance',
+            yAxis: 2,
+            data: [
+                {{range $ffdata := .FfData}}{{if $ffdata.HasValue}}[Date.UTC({{$ffdata.Year}},{{$ffdata.Month}},{{$ffdata.Day}}),{{$ffdata.NotableCp}}],{{end}}{{end}}
+            ],
+            marker: {
+                radius: 8,
+                symbol: powersymbol,
+            }
+        }
+        {{end}}
+        ]
+    });
+    {{end}}
+
+    {{if .Filter.ShowHvp}}
+    /**
+    *
+    * Heart vs Power :: Performance chart
+    * 
+    **/
+    cloneToolTip = null;
+    var container = document.getElementById("hvp-graph");
+
+    var chart = new Highcharts.Chart({
+        colors: linecolors,
+        chart: {
+            type: 'scatter',
+            zoomType: 'x',
+            renderTo: container,
+        },
+        title: {
+            text: '{{.HvpLabel}}' {{if .Filter.ShowCPs}} + ', and notable Critical Power (CP) for best <b>' + selectedCP + '</b> period{{if .Filter.Indoor}}, indoors{{end}}{{if .Filter.Outdoor}}, outdoors{{end}}{{if .Filter.Race}}, competitive{{end}}{{if .Filter.Train}}, non-competitive{{end}}.'{{end}}
+        },
+        subtitle: {
+            text: document.ontouchstart === undefined ?
+                    'Click and drag in the plot area to zoom in' :
+                    'Pinch the chart to zoom in'
+        },
+        credits: {
+            enabled: false
+        },
+        xAxis: {
+            type: 'datetime',
+            title: {
+                text: 'Date'
+            }
+        },
+        yAxis: [{
+            title: {
+                text: 'Av. Watts / bpm / rpm'
+            },
+            min: 40,
+            startOnTick: false
+        }
+        {{if .Filter.ShowCPs}}
+        ,{ // secondary yAxis
+            title: {
+                text: selectedCP + ' Critical Power (Watts)',
+            },
+            opposite: true
+        }
+        {{end}}
+        ],
+        tooltip: {
+            headerFormat: '<b>{series.name}</b><br>',
+            pointFormat: '{point.x:%e. %b}: {point.y:.2f}',
+            crosshairs: [false, true]
+            {{if .Filter.ShowCPs}}
+            ,formatter: function() {
+                var d = new Date(this.point.x);
+                var date = d.getDate() + ' ' + months[d.getMonth()] + ', ' + d.getFullYear();
+                if(this.point.avcp > 0){
+                    //only display links where activity meta (including activity_id exists - this won't exist where a user uploads a file [probably when bulk uploading historical files] and doesn't add and save meta)
+                    var link;
+                    if(this.point.activityID != ""){
+                        link = '<a href="http://joulepersecond.com:8080/view/activity/' + this.point.activityID + '/{{.Settings.EncId}}/" style="text-decoration:underline; color:red">View Activity</a>';
+                    }else{
+                        link = '';
+                    }
+                    return selectedCP +' CP output: <b>'+ this.point.y + '</b> W @ <b>' + this.point.avcp + '</b> bpm<br>Cadence: <b>' + this.point.avcad + '</b><br>' + date + '<br><b>' + this.point.activityName + '</b><br>' + link;
+                }else{
+                    return  this.point.series.name + ' ' + this.point.y.toFixed(2) + '<br>' + date;
+                }
+            }
+            {{end}}
+        },
+        legend:{
+            itemMarginBottom: 10
+        },
+
+        series: [
+        {
+            stickyTracking: false,
+            index:0,
+            regression: true ,
+            regressionSettings: {
+                type: 'polynomial',
+                dashStyle:"LongDash",
+                name: 'Av. heartrate trend (bpm)',
+                color: linecolors[0],
+                index: -1,
+                states: {hover:{enabled: false}}
+            },
+            name: 'Av. Heart rate (bpm)',
+            marker: {
+                radius: 3
+            },
+
+            // Define the data points. All series have a dummy year
+            // of 1970/71 in order to be compared on the same x axis. Note
+            // that in JavaScript, months start at 0 for January, 1 for February etc.
+            data: [
+                {{range $hvpdata := .HvpData}}[Date.UTC({{$hvpdata.Year}},{{$hvpdata.Month}},{{$hvpdata.Day}}),{{$hvpdata.AvHeartRate}}],{{end}}
+            ]
+        }, {
+            stickyTracking: false,
+            index:1,
+            regression: true ,
+            regressionSettings: {
+                dashStyle:"LongDash",
+                type: 'polynomial',
+                name: 'Av. power trend (W)',
+                color: linecolors[1],
+                index: -2,
+                states: {hover:{enabled: false}}
+            },
+            name: 'Av. power (W)',
+            marker: {
+                radius: 3
+            },
+            data: [
+                {{range $hvpdata := .HvpData}}[Date.UTC({{$hvpdata.Year}},{{$hvpdata.Month}},{{$hvpdata.Day}}),{{$hvpdata.AvPower}}],{{end}}
+            ]
+        }, {
+            stickyTracking: false,
+            index:2,
+            regression: true ,
+            regressionSettings: {
+                dashStyle:"LongDash",
+                type: 'polynomial',
+                name: 'Av. cadence trend (rpm)',
+                color: linecolors[2],
+                index: -3,
+                states: {hover:{enabled: false}}
+            },
+            name: 'Av. cadence (rpm)',
+            marker: {
+                radius: 3
+            },
+            data: [
+                {{range $hvpdata := .HvpData}}[Date.UTC({{$hvpdata.Year}},{{$hvpdata.Month}},{{$hvpdata.Day}}),{{$hvpdata.AvCadence}}],{{end}}
+            ]
+        }
+        {{if .Filter.ShowCPs}}//http://jsfiddle.net/japanick/dWDE6/314/
+        , {
+            stickyTracking: false,
+            index:3,
+            cursor: 'pointer',
+            point: {
+                events: {
+                    click: function() {//http://jsfiddle.net/larsenmtl/SeCAB/1/
+                        if (cloneToolTip)
+                        {                                
+                            chart.container.firstChild.removeChild(cloneToolTip);
+                        }
+                        cloneToolTip = chart.tooltip.label.element.cloneNode(true);
+                        chart.container.firstChild.appendChild(cloneToolTip);
+                    }
+                }
+            },
+
+            type: 'scatter',
+            regression: true,
+            regressionSettings: {
+                lineWidth:3,
+                dashStyle:"DashDot",
+                type: 'polynomial',
+                name: selectedCP + ' CP trend (Watts)',
+                color: "#DFDFE1",
+                index: -4,
+                states: {hover:{enabled: false}}
+            },
+            name: 'Notable CP (W)',
+            yAxis: 1,
+            data: [
+                {{range $hvpdata := .HvpData}}{{if $hvpdata.HasValue}}{x: Date.UTC({{$hvpdata.Year}},{{$hvpdata.Month}},{{$hvpdata.Day}}), y: {{$hvpdata.NotableCp}}, avcad:{{$hvpdata.CpCad}}, avcp: {{$hvpdata.CpHr}}, activityID: '{{$hvpdata.Meta.ActivityID}}', activityName: '{{$hvpdata.Meta.ActivityName}}' },{{end}}{{end}}
+            ],
+            marker: {
+                radius: 8,
+                symbol: powersymbol
+            }
+        }
+        {{end}}]
+    });
+    {{end}}
+    {{if .Filter.ShowDur}}
+    /**
+    *
+    * Tss vs Duration
+    * 
+    **/
+
+    $('#tvd_chart').highcharts({
+        chart: {
+            zoomType: 'xy'
+        },
+        title: {
+            text: '{{.TvdLegend}}'
+        },
+        subtitle: {
+            text: ''
+        },
+        credits: {
+            enabled: false
+        },
+        xAxis: [{
+            categories: [{{range $tvddata := .TvdData}}'{{$tvddata.TimeLabel}}',{{end}}]
+        }],
+        yAxis: [{ // Primary yAxis
+            labels: {
+                format: '{value}h',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            },
+            title: {
+                text: 'Duration in hours',
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            }
+        }, { // Secondary yAxis
+            title: {
+                text: 'Cumulative Training load',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            labels: {
+                format: '{value}',
+                style: {
+                    color: Highcharts.getOptions().colors[0]
+                }
+            },
+            opposite: true
+        }],
+        tooltip: {
+            shared: true,
+            crosshairs: [false, true]
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'left',
+            x: 120,
+            verticalAlign: 'top',
+            y: 100,
+            floating: true,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+        },
+        series: [{
+            name: 'Total Training load',
+            type: 'column',
+            yAxis: 1,
+            data: [{{range $tvddata := .TvdData}}{{$tvddata.TotalTss}},{{end}}],
+            tooltip: {
+                valueSuffix: ' Training load units'
+            }
+
+        }, {
+            name: 'Total Duration',
+            type: 'spline',
+            data: [{{range $tvddata := .TvdData}}{{$tvddata.TotalDur}},{{end}}],
+            tooltip: {
+                valueSuffix: ' Hours'
+            }
+        }]
+    });
+    {{end}}
+    {{if .Filter.ShowPbz}}
+    /**
+    *
+    * Power by Zone
+    * 
+    **/
+
+    $('#pbz_chart').highcharts({
+        chart: {
+            type: 'column',
+            zoomType: 'x'
+        },
+        title: {
+            text: '{{.TvdLegend}}'
+        },
+        subtitle: {
+            text: ''
+        },
+        credits: {
+            enabled: false
+        },
+        xAxis: [{
+            categories: [{{range $pbzdata := .PbzData}}'{{$pbzdata.TimeLabel}}',{{end}}]
+        }],
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Hours'
+            }
+        },
+        tooltip: {
+            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                '<td style="padding:0"><b>{point.y:.2f} Hours</b></td></tr>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        series: [{
+            name: 'Z1',
+            data: [{{range $pbzdata := .PbzData}}{{$pbzdata.AvZ1}},{{end}}]
+
+        }, {
+            name: 'Z2',
+            data: [{{range $pbzdata := .PbzData}}{{$pbzdata.AvZ2}},{{end}}]
+
+        }, {
+            name: 'Z3',
+            data: [{{range $pbzdata := .PbzData}}{{$pbzdata.AvZ3}},{{end}}]
+
+        }, {
+            name: 'Z4',
+            data: [{{range $pbzdata := .PbzData}}{{$pbzdata.AvZ4}},{{end}}]
+
+        }, {
+            name: 'Z5',
+            data: [{{range $pbzdata := .PbzData}}{{$pbzdata.AvZ5}},{{end}}]
+
+        }, {
+            name: 'Z6',
+            data: [{{range $pbzdata := .PbzData}}{{$pbzdata.AvZ6}},{{end}}]
+
+        }]
+    });
+    
+    {{end}}
+    {{if .Filter.ShowHbz}}
+    /**
+    *
+    * Heartrate by Zone
+    * 
+    **/
+
+    $('#hbz_chart').highcharts({
+        chart: {
+            type: 'column',
+            zoomType: 'x'
+        },
+        title: {
+            text: '{{.TvdLegend}}'
+        },
+        subtitle: {
+            text: ''
+        },
+        credits: {
+            enabled: false
+        },
+        xAxis: [{
+            categories: [{{range $hbzdata := .HbzData}}'{{$hbzdata.TimeLabel}}',{{end}}]
+        }],
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Hours'
+            }
+        },
+        tooltip: {
+            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+            pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                '<td style="padding:0"><b>{point.y:.2f} Hours</b></td></tr>',
+            footerFormat: '</table>',
+            shared: true,
+            useHTML: true
+        },
+        plotOptions: {
+            column: {
+                pointPadding: 0.2,
+                borderWidth: 0
+            }
+        },
+        series: [{
+            name: 'Z1',
+            data: [{{range $hbzdata := .HbzData}}{{$hbzdata.AvZ1}},{{end}}]
+
+        }, {
+            name: 'Z2',
+            data: [{{range $hbzdata := .HbzData}}{{$hbzdata.AvZ2}},{{end}}]
+
+        }, {
+            name: 'Z3',
+            data: [{{range $hbzdata := .HbzData}}{{$hbzdata.AvZ3}},{{end}}]
+
+        }, {
+            name: 'Z4',
+            data: [{{range $hbzdata := .HbzData}}{{$hbzdata.AvZ4}},{{end}}]
+
+        }, {
+            name: 'Z5a',
+            data: [{{range $hbzdata := .HbzData}}{{$hbzdata.AvZ5a}},{{end}}]
+
+        }, {
+            name: 'Z5b',
+            data: [{{range $hbzdata := .HbzData}}{{$hbzdata.AvZ5b}},{{end}}]
+
+        }, {
+            name: 'Z5c',
+            data: [{{range $hbzdata := .HbzData}}{{$hbzdata.AvZ5c}},{{end}}]
+
+        }]
+    });
+    {{end}}
+
+
+});
+</script>
+
+
+
+
+
+{{if .Settings.Demo}}<style>.section-ln{background-color: white}</style>{{end}}
+</head>
+
+<body class="analysis-page-body">
+<section class="section-ln">
+    <h3>Historical Analysis</h3>
+    <div class="basic-form">
+        <form id="filter-update" action="#" method="post">
+            <div class="col-1-2">
+                <label for="history-len">Analysis period length (days)*</label>
+                <input type="number" id="history-len" name="history-len" value="{{.Filter.Historylen}}" /><br>
+                <label for="cp-fitler">Overlay graphs with notable critical power metrics<sup>&Dagger;</sup></label>
+                <select name="cp-filter" id="cp-filter">
+                    <option value="0">None</option>
+                    <option value="5" {{if .Filter.S5}}selected="selected"{{end}}>5 sec</option>
+                    <option value="20" {{if .Filter.S20}}selected="selected"{{end}}>20 Sec</option>
+                    <option value="60" {{if .Filter.S60}}selected="selected"{{end}}>60 sec</option>
+                    <option value="300" {{if .Filter.S300}}selected="selected"{{end}}>5 Min</option>
+                    <option value="1200" {{if .Filter.S1200}}selected="selected"{{end}}>20 Min</option>
+                    <option value="3600" {{if .Filter.S3600}}selected="selected"{{end}}>60 Min</option>
+                </select><br>
+                <p class="filter-blurb"><b>Filter settings</b>: You can significantly speed up results processing (especially at busy times) by limiting the number of days' history and only selecting those graphs you need.<br>&nbsp;<br>
+                    <span><strong>*Note:</strong> Maximum value is 90 for free users.</span><br>
+                    <span><strong><sup>&Dagger;</sup></strong>Refer also to the <a href="https://joulepersecond.com/myaccount" title="Advanced Settings -> Notable CP Roll Off" target="_blank">Advanced Settings -> Notable CP Roll Off</a> setting allowing you adjust the display of notable performances. This will also affect the CP trendline gradient.</span>
+
+                </p>
+                
+            </div>
+
+            <div class="col-1-2">
+                <label id="chk-heart" for="chk-hvp">Performance Chart [<a style="cursor:pointer">More options</a> <mark class="arrow" title="" style="color: initial; background-color: transparent">&#x25BD;</mark>]</label>
+                <input id="chk-hvp" type="checkbox" name="show-hvp" value="checked" {{if .Filter.ShowHvp}}checked="checked"{{end}} disabled="disabled">
+                <div id="pc-options">
+                    <label for="hvp-from">Activities from duration (minutes)</label>
+                    <input type="number" id="hvp-from" name="hvp-from" value="{{.Filter.HvpFrom}}" /><br>
+                    <label for="hvp-to">Activities to duration (minutes)</label>
+                    <input type="number" id="hvp-to" name="hvp-to" value="{{.Filter.HvpTo}}" /><br>
+                    <label for="offset-days">Period offset (ending x days ago)</label>
+                    <input type="number" min="0" id="offset-days" name="offset-days" value="{{.Filter.OffsetDays}}" /><br>
+                    <label for="is-indoor">Indoor Rides</label>
+                    <input type="checkbox" id="is-indoor" name="is-indoor" value="true" {{if .Filter.Indoor}}checked="checked"{{end}}/><br>
+                    <label for="is-outdoor">Outdoor Rides</label>
+                    <input type="checkbox" id="is-outdoor" name="is-outdoor" value="true" {{if .Filter.Outdoor}}checked="checked"{{end}} /><br>
+                    <label for="is-race">Competitive Rides</label>
+                    <input type="checkbox" id="is-race" name="is-race" value="true" {{if .Filter.Race}}checked="checked"{{end}}/><br>
+                    <label for="is-training">Training Rides</label>
+                    <input type="checkbox" id="is-training" name="is-training" value="true" {{if .Filter.Train}}checked="checked"{{end}}/><br>
+                    <label for="has-heart">Has Heartrate data</label>
+                    <input type="checkbox" id="has-heart" name="has-heart" value="true" {{if .Filter.HeartData}}checked="checked"{{end}}/>
+                </div>
+
+                <script>
+                    jQuery('#is-indoor, #is-outdoor').on("change", function(e){
+                        if(!jQuery('#is-indoor').is(':checked') && !jQuery('#is-outdoor').is(':checked'))
+                        {
+                            if(jQuery(this).attr("id") == "is-indoor"){
+                                jQuery('#is-outdoor').prop("checked", true);
+                            }else{
+                                jQuery('#is-indoor').prop("checked", true);
+                            }
+                        }
+                    });
+                     jQuery('#is-race, #is-training').on("change", function(e){
+                        if(!jQuery('#is-race').is(':checked') && !jQuery('#is-training').is(':checked'))
+                        {
+                            if(jQuery(this).attr("id") == "is-race"){
+                                jQuery('#is-training').prop("checked", true);
+                            }else{
+                                jQuery('#is-race').prop("checked", true);
+                            }
+                        }
+                    });
+                </script>
+
+                <label for="chk-tss">Show Training impact</label>
+                <input id="chk-tss" type="checkbox" name="show-tss" value="checked" {{if .Filter.ShowTss}}checked="checked"{{end}}><br>
+                <label for="chk-mmp">Show Mean Maximal Power</label>
+                <input id="chk-mmp" type="checkbox" name="show-mmp" value="checked" {{if .Filter.ShowMmp}}checked="checked"{{end}}><br>
+                <label for="chk-dur">Show Training load<sup>&dagger;</sup> vs Duration</label>
+                <input id="chk-dur" type="checkbox" name="show-dur" value="checked" {{if .Filter.ShowDur}}checked="checked"{{end}}><br>
+                <label for="chk-pbz">Show Power by Zone</label>
+                <input id="chk-pbz" type="checkbox" name="show-pbz" value="checked" {{if .Filter.ShowPbz}}checked="checked"{{end}}><br>
+                <label for="chk-hbz">Show Heartrate by Zone</label>
+                <input id="chk-hbz" type="checkbox" name="show-hbz" value="checked" {{if .Filter.ShowHbz}}checked="checked"{{end}}><br>
+            </div>
+            <button class="default-btn" type="submit"><b>Analyse</b></button>
+        </form>
+    </div>
+</section>
+
+{{if .Filter.HasGraphOutput}}
+
+    {{if .Filter.ShowHvp}}
+    <section class="section-ln">
+        <h3>Performance Chart</h3>
+        {{if .Filter.ShowCPs}}
+        <h4>Notable <span class="value"><script>document.write(selectedCP)</script></span> Critical Power output (last {{.Filter.Historylen}} days), Offset = {{.Filter.OffsetDays}} days</h4>
+        <div style="max-height:200px; overflow-y:scroll">
+            <table id="cp-results" style="padding: 20px 30px 0; margin-bottom: 0; overflow: hidden; min-height: 50px; font-size:0.9em">
+                <thead>
+                    <tr><th>Date</th><th>Activity Name</th><th>CP Output (Watts)</th><th>CP Heartrate</th><th>CP cadence</th></tr>
+                </thead>
+                <tbody>
+
+                    {{range $hvpdata := .HvpData}}
+                    {{if $hvpdata.HasValue}}
+                        <script> 
+                            var d = new Date(Date.UTC({{$hvpdata.Year}},{{$hvpdata.Month}},{{$hvpdata.Day}}));
+                            var date = d.getDate() + ' ' + months[d.getMonth()] + ', ' + d.getFullYear();
+                            var link = '<a href="http://joulepersecond.com:8080/view/activity/' + {{$hvpdata.Meta.ActivityID}} + '/' + enc_user_id + '" title="{{$hvpdata.Meta.ActivityName}}">{{$hvpdata.Meta.ActivityName}}</a>';
+                        </script>
+                        <tr>
+                            <td style="width:20%"><span class="value"><script>document.write(date);</script></span></td>
+                            <td style="width:20%"><div><span class="value"><script>document.write(link);</script></span></div></td>
+                            <td style="width:20%"><span class="value">{{if $hvpdata.NotableCp}}{{$hvpdata.NotableCp}} W{{else}}-{{end}}</span></td>
+                            <td style="width:20%"><span class="value">{{if $hvpdata.CpHr}}{{$hvpdata.CpHr}} bpm{{else}}-{{end}}</span></td>
+                            <td style="width:20%"><span class="value">{{if $hvpdata.CpCad}}{{$hvpdata.CpCad}} rpm{{else}}-{{end}}</span></td>
+                        </tr>
+
+                    {{end}}
+                    {{end}}
+                </tbody>
+            </table>
+            <script>//reverse the results
+                [].reverse.call($("#cp-results tbody tr")).appendTo("#cp-results tbody");
+            </script>
+        </div>
+        {{end}}
+        <div id="hvp-graph" class="chart" style="min-width: 310px; height: 600px; margin: 0 auto 15px"></div>
+    </section>
+    <hr>
+    {{end}} 
+
+
+    {{if .Filter.ShowTss}}
+    <section class="section-ln">
+        <h3>Training impact (For last {{.Filter.Historylen}} days)</h3>
+        <div id="ff-graph" class="chart" style="min-width: 310px; height: 500px; margin: 0 auto 15px"></div>
+    </section>
+    {{end}}
+
+    {{if .Filter.ShowMmp}}
+    <section class="section-ln">
+        <style>
+            div.google-visualization-tooltip { padding:3px; background-color: rgba(0,0,0,0.8); border-radius: 5px; color: white; border:1px black solid; }
+        </style>
+        <h3>Mean Maximal Power vs previous two periods</h3>
+        <div id="cpc_chart" class="chart" style="min-width: 310px; height: 400px; margin: 0 auto 15px"></div>
+    </section>
+    {{end}}
+
+    {{if .Filter.ShowDur}}
+    <section class="section-ln">
+        <h3>Training load<sup>&dagger;</sup> vs Duration</h3>
+        <div id="tvd_chart" class="chart" style="min-width: 310px; height: 400px; margin: 0 auto 15px"></div>
+    </section>
+    {{end}}
+
+    {{if .Filter.ShowPbz}}
+    <section class="section-ln">
+        <h3>Power by zone</h3>
+        <div id="pbz_chart" class="chart" style="min-width: 310px; height: 400px; margin: 0 auto 15px"></div>
+    </section>
+    {{end}}
+
+    {{if .Filter.ShowHbz}}
+    <section class="section-ln">
+        <h3>Heart rate by zone</h3>
+        <div id="hbz_chart" class="chart" style="min-width: 310px; height: 400px; margin: 0 auto 15px"></div>
+    </section>
+    {{end}}
+
+     
+
+{{end}}
+<section class="section-ln">
+    <span class="note"><sup>&dagger;</sup>Since our site is performing many of the same functions as <b>TrainingPeaks</b>, we have been asked by them to stop using their trademarks which include TSS, IF, Training Stress Score, NP and Normalized Power. We therefore use our own descriptors where required to do so.</span>
+</section>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-59961992-1', 'auto');
+  ga('send', 'pageview');
+
+
+    jQuery('#hvp-from, #hvp-to').on("change", function(){
+        jQuery('#chk-hvp').attr("checked","checked");
+        if(Number(jQuery('#hvp-from').val()) > Number(jQuery('#hvp-to').val())){
+            jQuery('#hvp-to').val(jQuery('#hvp-from').val());
+        }
+    });
+
+    jQuery('#pc-options').hide();
+    jQuery('#chk-heart').on("click", function(){
+        jQuery('#pc-options').slideToggle(500, function(){
+            if(jQuery('#pc-options').css("display") == "block"){
+                jQuery('#chk-heart .arrow').html("\&#x25B3;");
+            }else{
+                jQuery('#chk-heart .arrow').html("\&#x25BD;");
+            }
+        });
+    });
+
+
+    //swap zero and blank table values for -
+    jQuery('td span.value a').each(function(){
+        if(jQuery(this).text() == ""){
+            jQuery(this).parent().html("-");
+        }
+    });
+    
+</script>
+</body>
+</html>

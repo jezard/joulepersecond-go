@@ -1,0 +1,386 @@
+<script src="http://joulepersecond.com/js/highcharts/highcharts.js"></script>
+<script src="http://joulepersecond.com/js/highcharts/highcharts-more.js"></script>
+<script src="http://joulepersecond.com/js/highcharts/modules/solid-gauge.src.js"></script>
+<script src="http://joulepersecond.com/js/highcharts/highcharts-regression.js"></script>
+<script src="http://joulepersecond.com/js/highcharts/themes/jps-{{.Settings.Theme}}.js"></script>
+
+<script type="text/javascript">
+
+$(function () {
+    /**
+    *
+    * Dashboard 
+    * 
+    **/
+
+    $('#powerdist_chart').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotShadow: false
+        },
+        legend: {
+            enabled: false
+        },
+        title: {
+            text: 'Power Distribution (%)',
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                },
+                startAngle: -90,
+                endAngle: 90,
+                center: ['50%', '75%']
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Power Zone',
+            innerSize: '20%',
+            data: [
+                ['Zone 1',   {{.ZoneData.Z1}}],
+                ['Zone 2',   {{.ZoneData.Z2}}],
+                ['Zone 3',   {{.ZoneData.Z3}}],
+                ['Zone 4',   {{.ZoneData.Z4}}],
+                ['Zone 5',   {{.ZoneData.Z5}}],
+                ['Zone 6',   {{.ZoneData.Z6}}],
+            ]
+        }]
+    });
+
+    var z1 = {{.ZoneData.Z1}};
+    var z2 = {{.ZoneData.Z2}};
+    var z3 = {{.ZoneData.Z3}};
+    var z4 = {{.ZoneData.Z4}};
+    var z5 = {{.ZoneData.Z5}};
+    var z6 = {{.ZoneData.Z6}};
+
+    var timeStringZ1 = '<span class="tt-time">Zone 1: ' + Math.floor(z1/3600) + 'h ' + Math.floor((z1/60)%60) + 'm ' + Math.floor(z1%60) + 's</span>';
+    var timeStringZ2 = '<span class="tt-time">Zone 2: ' + Math.floor(z2/3600) + 'h ' + Math.floor((z2/60)%60) + 'm ' + Math.floor(z2%60) + 's</span>';
+    var timeStringZ3 = '<span class="tt-time">Zone 3: ' + Math.floor(z3/3600) + 'h ' + Math.floor((z3/60)%60) + 'm ' + Math.floor(z3%60) + 's</span>';
+    var timeStringZ4 = '<span class="tt-time">Zone 4: ' + Math.floor(z4/3600) + 'h ' + Math.floor((z4/60)%60) + 'm ' + Math.floor(z4%60) + 's</span>';
+    var timeStringZ5 = '<span class="tt-time">Zone 5: ' + Math.floor(z5/3600) + 'h ' + Math.floor((z5/60)%60) + 'm ' + Math.floor(z5%60) + 's</span>';
+    var timeStringZ6 = '<span class="tt-time">Zone 6: ' + Math.floor(z6/3600) + 'h ' + Math.floor((z6/60)%60) + 'm ' + Math.floor(z6%60) + 's</span>';
+
+    $('#power-bar').highcharts({
+        chart: {
+            type: 'bar'
+        },
+        legend: {
+            enabled: false
+        },
+        title: {
+            text: 'Power Distribution (time)'
+        },
+        xAxis: {
+            categories: ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6'],
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Time',
+                align: 'high'
+            },
+            labels: {
+                overflow: 'justify'
+            }
+        },
+        tooltip: {
+            valueSuffix: ' Seconds',
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+           name: 'Time in Zone',
+            data: [{
+                y:{{.ZoneData.Z1}},
+                name: timeStringZ1,
+            },{
+                y:{{.ZoneData.Z2}},
+                name: timeStringZ2
+            },{
+                y:{{.ZoneData.Z3}},
+                name: timeStringZ3
+            },{
+                y:{{.ZoneData.Z4}},
+                name: timeStringZ4
+            },{ 
+                y:{{.ZoneData.Z5}},
+                name: timeStringZ5
+            },{ 
+                y:{{.ZoneData.Z6}},
+                name: timeStringZ6
+            }],
+        }]
+    });
+
+     $('#heartdist_chart').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotShadow: false
+        },
+        legend: {
+            enabled: false
+        },
+        title: {
+            text: 'Heartrate Distribution (%)',
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                },
+                startAngle: -90,
+                endAngle: 90,
+                center: ['50%', '75%']
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Power Zone',
+            innerSize: '20%',
+            data: [
+                ['Zone 1',   {{.ZoneData.HR1}}],
+                ['Zone 2',   {{.ZoneData.HR2}}],
+                ['Zone 3',   {{.ZoneData.HR3}}],
+                ['Zone 4',   {{.ZoneData.HR4}}],
+                ['Zone 5a',   {{.ZoneData.HR5a}}],
+                ['Zone 5b',   {{.ZoneData.HR5b}}],
+                ['Zone 5c',   {{.ZoneData.HR5c}}],
+            ]
+        }]
+    });
+
+    var hr1 = {{.ZoneData.HR1}};
+    var hr2 = {{.ZoneData.HR2}};
+    var hr3 = {{.ZoneData.HR3}};
+    var hr4 = {{.ZoneData.HR4}};
+    var hr5a = {{.ZoneData.HR5a}};
+    var hr5b = {{.ZoneData.HR5b}};
+    var hr5c = {{.ZoneData.HR5c}};
+
+    var timeStringHR1 = '<span class="tt-time">Zone 1: ' + Math.floor(hr1/3600) + 'h ' + Math.floor((hr1/60)%60) + 'm ' + Math.floor(hr1%60) + 's</span>';
+    var timeStringHR2 = '<span class="tt-time">Zone 2: ' + Math.floor(hr2/3600) + 'h ' + Math.floor((hr2/60)%60) + 'm ' + Math.floor(hr2%60) + 's</span>';
+    var timeStringHR3 = '<span class="tt-time">Zone 3: ' + Math.floor(hr3/3600) + 'h ' + Math.floor((hr3/60)%60) + 'm ' + Math.floor(hr3%60) + 's</span>';
+    var timeStringHR4 = '<span class="tt-time">Zone 4: ' + Math.floor(hr4/3600) + 'h ' + Math.floor((hr4/60)%60) + 'm ' + Math.floor(hr4%60) + 's</span>';
+    var timeStringHR5a = '<span class="tt-time">Zone 5a: ' + Math.floor(hr5a/3600) + 'h ' + Math.floor((hr5a/60)%60) + 'm ' + Math.floor(hr5a%60) + 's</span>';
+    var timeStringHR5b = '<span class="tt-time">Zone 5b: ' + Math.floor(hr5b/3600) + 'h ' + Math.floor((hr5b/60)%60) + 'm ' + Math.floor(hr5b%60) + 's</span>';
+    var timeStringHR5c = '<span class="tt-time">Zone 5c: ' + Math.floor(hr5c/3600) + 'h ' + Math.floor((hr5c/60)%60) + 'm ' + Math.floor(hr5c%60) + 's</span>';
+
+    $('#heart-bar').highcharts({
+        chart: {
+            type: 'bar'
+        },
+        legend: {
+            enabled: false
+        },
+        title: {
+            text: 'Heartrate Distribution (time)'
+        },
+        xAxis: {
+            categories: ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5a', 'Zone 5b', 'Zone 5c'],
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Time',
+                align: 'high'
+            },
+            labels: {
+                overflow: 'justify'
+            }
+        },
+        tooltip: {
+            valueSuffix: ' Seconds',
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+           name: 'Time in Zone',
+            data: [{
+                y:{{.ZoneData.HR1}},
+                name: timeStringHR1
+            },{
+                y:{{.ZoneData.HR2}},
+                name: timeStringHR2
+            },{
+                y:{{.ZoneData.HR3}},
+                name: timeStringHR3
+            },{
+                y:{{.ZoneData.HR4}},
+                name: timeStringHR4
+            },{ 
+                y:{{.ZoneData.HR5a}},
+                name: timeStringHR5a
+            },{ 
+                y:{{.ZoneData.HR5b}},
+                name: timeStringHR5b
+            },{ 
+                y:{{.ZoneData.HR5c}},
+                name: timeStringHR5c
+            }],
+        }]
+    });
+
+});
+</script>
+
+<script type="text/javascript">
+    var d=new Date()
+    var weekday=new Array("Sunday","Monday","Tuesday","Wednesday","Thursday",
+                "Friday","Saturday")
+</script>
+
+
+<section class="section-ln">
+    <h3>Dashboard</h3>
+    <h5 class="m-message">{{.Message}}</h5>
+    <div class="content-container">
+        
+        {{if .DashboardTvd.TotalDur }}
+        <div class="col-1-2 dashtop">
+            <h4>So far this week (Monday<script> if(d.getDay() != 1) document.write(" - " + weekday[d.getDay()]);//don't show on Monday!</script>):</h4>
+            <strong>Training load<sup>&dagger;</sup></strong>: <span class="value">{{.DashboardTvd.TotalTss}}</span><br>
+            <strong>Duration</strong>: <span class="value">{{.DashboardTvd.TotalDur}}</span> Hour(s)<br>
+            <strong>&nbsp;</strong>
+        </div>
+        {{end}}
+        <div class="col-1-2 dashtop">
+            <h4>Today's Form</h4>    
+            <strong>CTL</strong>: <span class="value value-space">{{.Current_ff.Ctl}}</span> Your overall fitness level<br>
+            <strong>ATL</strong>: <span class="value value-space">{{.Current_ff.Atl}}</span> How fatigued you are<br>
+            <strong>TSB</strong>: <span id="tsb" class="value value-space tsb">{{.Current_ff.Tsb}}</span> Your current form
+        </div>
+        <div style="clear:both"></div>
+        {{if .ZoneData.HasPower}}
+        <h4>This week's power</h4>
+        <div class="col-1-2">
+            <div id="powerdist_chart" class="dashport"></div>
+        </div>
+        <div class="col-1-2">
+            <div id="power-bar" class="dashport"></div>
+        </div>
+        {{else}}
+        <h4>No Power data recorded this week</h4>
+        {{end}}
+        <div id="power-zones" class="boundary-table">
+            <span>Power zone boundaries calculated from your current saved Threshold Power value [<a class="show-more" style="cursor:pointer">Show</a> <mark class="arrow" title="" style="color: initial; background-color: transparent">&#x25BD;</mark>]</span>
+            <table style="display:none">
+                <tr>
+                    <th>Zone</th>
+                    <th>Range (Watts)</th>
+                </tr>
+                <tr>
+                    <td><span class="value">1</span></td>
+                    <td><span class="value">&lt; {{.ZoneLabels.PowerZ1}}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="value">2</span></td>
+                    <td><span class="value">{{.ZoneLabels.PowerZ1}} - {{.ZoneLabels.PowerZ2}}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="value">3</span></td>
+                    <td><span class="value">{{.ZoneLabels.PowerZ2}} - {{.ZoneLabels.PowerZ3}}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="value">4</span></td>
+                    <td><span class="value">{{.ZoneLabels.PowerZ3}} - {{.ZoneLabels.PowerZ4}}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="value">5</span></td>
+                    <td><span class="value">{{.ZoneLabels.PowerZ4}} - {{.ZoneLabels.PowerZ5}}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="value">6</span></td>
+                    <td><span class="value">&gt; {{.ZoneLabels.PowerZ5}}</span></td>
+                </tr>
+            </table>
+        </div>
+        {{if .ZoneData.HasHeart}}
+        <h4>This week's Heartrate</h4>
+        <div class="col-1-2">
+            <div id="heartdist_chart" class="dashport"></div>
+        </div>
+        <div class="col-1-2">
+            <div id="heart-bar" class="dashport"></div>
+        </div>
+        {{else}}
+        <h4>No Heartrate data recorded this week</h4>
+        {{end}}
+        <div id="heart-zones" class="boundary-table">
+            <span>Heartrate zone boundaries calculated from your current saved Threshold Heartrate value [<a class="show-more" style="cursor:pointer">Show</a> <mark class="arrow" title="" style="color: initial; background-color: transparent">&#x25BD;</mark>]</span>
+            <table style="display:none">
+                <tr>
+                    <th>Zone</th>
+                    <th>Range (bpm)</th>
+                </tr>
+                <tr>
+                    <td><span class="value">1</span></td>
+                    <td><span class="value">&lt; {{.ZoneLabels.HeartZ1}}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="value">2</span></td>
+                    <td><span class="value">{{.ZoneLabels.HeartZ1}} - {{.ZoneLabels.HeartZ2}}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="value">3</span></td>
+                    <td><span class="value">{{.ZoneLabels.HeartZ2}} - {{.ZoneLabels.HeartZ3}}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="value">4</span></td>
+                    <td><span class="value">{{.ZoneLabels.HeartZ3}} - {{.ZoneLabels.HeartZ4}}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="value">5a</span></td>
+                    <td><span class="value">{{.ZoneLabels.HeartZ4}} - {{.ZoneLabels.HeartZ5a}}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="value">5b</span></td>
+                    <td><span class="value">{{.ZoneLabels.HeartZ5a}} - {{.ZoneLabels.HeartZ5b}}</span></td>
+                </tr>
+                <tr>
+                    <td><span class="value">5c</span></td>
+                    <td><span class="value">&gt; {{.ZoneLabels.HeartZ5b}}</span></td>
+                </tr>
+            </table>
+        </div>
+        
+    </div>
+</section>
+<script>
+    if(Number({{.Current_ff.Tsb}}) < 0){
+        jQuery('#tsb').css('background-color', '#ff9999');
+    }else{
+        jQuery('#tsb').css('background-color', '#99ff99');
+    }
+    jQuery('.show-more').on("click", function(){
+        jQuery(this).parents('.boundary-table').find('table').toggle(200, function(){
+            if(jQuery(this).css("display") == "table"){
+                jQuery(this).parent().find('.arrow').html("\&#x25B3;");
+            }else{
+                jQuery(this).parent().find('.arrow').html("\&#x25BD;");
+            }
+        });
+    });
+</script>

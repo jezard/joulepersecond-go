@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>{{.Title}}</title>
+
+<meta charset="utf-8">
+<!-- <link href='http://fonts.googleapis.com/css?family=Lato:100,300,400,700,100italic,300italic,400italic' rel='stylesheet' type='text/css'> -->
+<link rel='stylesheet' href='http://joulepersecond.com/css/style.css' type='text/css' media='all' />
+<!-- Bootstrap -->
+<link href="http://joulepersecond.com/bootstrap-3.3.2/css/bootstrap.min.css" rel="stylesheet">
+<link rel='stylesheet' href='http://joulepersecond.com/css/light.css' type='text/css' media='all' />
+<link rel='stylesheet' href='http://joulepersecond.com/includes/colors.php' type='text/css' media='all' />
+<link href="http://joulepersecond.com/bootstrap-3.3.2/css/bootstrap-theme.css" rel="stylesheet">
+
+<script src="//use.typekit.net/mbs5qua.js"></script>
+<script>try{Typekit.load();}catch(e){}</script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script src="http://joulepersecond.com/js/highcharts/highcharts.js"></script>
+<script src="http://joulepersecond.com/js/highcharts/highcharts-more.js"></script>
+<script src="http://joulepersecond.com/js/highcharts/modules/solid-gauge.src.js"></script>
+
+<script src="http://joulepersecond.com/js/highcharts/modules/exporting.js"></script>
+<script src="http://joulepersecond.com/js/highcharts/themes/jps-{{.Theme}}.js"></script>
+<script src="http://joulepersecond.com/bootstrap-3.3.2/js/bootstrap.min.js"></script>
+
+
+
+
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+      	var textcolor = '#999';
+      	var gridlinecolor ='transparent'
+      	var bgcol = "transparent";//#333
+        var linecolor;
+
+        if('{{.Theme}}' == 'gray'){
+            linecolor = '#d90000';
+        }else{
+            linecolor = "#6DD300";
+        }
+
+
+        {{if .HasPower}}
+        var cp_chart_data = google.visualization.arrayToDataTable([
+          	['Time', 'Power'],
+          	{{range $cprow := .CPData}}[{{$cprow.CpTime}}, {{$cprow.CpVal}}],
+			{{end}}
+        ]);
+		var cp_options = {
+			fontName: 'proxima-nova',
+            curveType: 'function',
+            titleTextStyle:{
+                color: linecolor,
+                fontSize: 16,
+                bold: false,
+            },
+			fontSize: '10',
+          	hAxis: { logScale: true, gridlines: {color: gridlinecolor}, textStyle:{color:'#000000'}, textPosition:'in', ticks: [{v:[0,0,5], f:'5s'},{v:[0,0,20], f:'20s'},{v:[0,1,0], f:'1m'},{v:[0,5,0], f:'5m'},{v:[0,20,0], f:'20m'},{v:[1,0,0], f:'1h'},{v:[2,0,0], f:'2h'}]},
+          	vAxis: {showTextEvery: 100, format:"#W", textStyle:{color:textcolor},gridlines: {color: '#666'}, textStyle:{color:textcolor}},
+          	lineWidth:1,
+			colors: [linecolor],
+			theme:'maximized',
+			backgroundColor:{fill: bgcol, stroke:'#66635e'},
+          	explorer: { actions: ['dragToZoom', 'rightClickToReset'], keepInBounds: true },
+          	crosshair: { trigger: 'both', color: 'gray', opacity: 0.5 }, // Display crosshairs on focus and selection
+			legend: {textStyle:{color:textcolor}, position: 'bottom'},
+            tooltip:{textStyle:{fontSize:16}, trigger: 'selection'}
+        };
+        var cp_chart = new google.visualization.LineChart(document.getElementById('cpc_chart'));
+        cp_chart.draw(cp_chart_data, cp_options);
+        {{end}}
+
+      }
+    </script>
+
+
+<script type="text/javascript">
+//set name of activity to that typed in main field
+window.addEventListener('message',function(e) {
+    if (e.origin == 'http://joulepersecond.com') {
+        if(e.data != ""){//don't override the existing value with a blank
+            jQuery('#activity-name').val(e.data);
+            jQuery('#activity-meta').submit();
+        }
+       
+    }
+}, false);
+
+//make date work more universally across browsers
+var dateString = '{{.EndSummary.StartTime}}';
+dateString = dateString.replace(/-/g,'/');
+dateString = dateString.substring(0, 19)
+var startDate = new Date(dateString);
+
+ if('{{.Theme}}' == 'gray'){
+    stop1 = "#5A5A5D";
+    stop2 = "#D90000";
+ }else{
+    stop1 = "#6DD300";
+    stop2 = "#fb4b02";
+ }
+
+$(function () {
+
+        var gaugeOptions = {
+
+        chart: {
+            type: 'solidgauge'
+        },
+
+        title: null,
+
+        pane: {
+            center: ['50%', '85%'],
+            size: '100%',
+            startAngle: -90,
+            endAngle: 90,
+            background: {
+                backgroundColor: (Highcharts.theme && Highcharts.theme.background2) || '#EEE',
+                innerRadius: '60%',
+                outerRadius: '100%',
+                shape: 'arc'
+            }
+        },
+
+        tooltip: {
+            enabled: false
+        },
+
+        // the value axis
+        yAxis: {
+            stops: [
+                [0.5, stop1], // yellow
+                [0.75, stop2] // red
+            ],
+            lineWidth: 0,
+            minorTickInterval: null,
+            tickPixelInterval: 400,
+            tickWidth: 0,
+            title: {
+                y: -70
+            },
+            labels: {
+                y: 16
+            }
+        },
+
+        plotOptions: {
+            solidgauge: {
+                dataLabels: {
+                    y: 5,
+                    borderWidth: 0,
+                    useHTML: true
+                }
+            }
+        }
+    };
+
+    {{if .HasPower}}
+    // The intensity gauge
+    $('#container-intensity').highcharts(Highcharts.merge(gaugeOptions, {
+        yAxis: {
+            min: 50,
+            max: 100,
+            title: {
+                text: ''
+            }
+        },
+        credits: {
+            enabled: false
+        },
+
+        series: [{
+            name: 'Intensity',
+            data: [{{if .EndSummary.If}}{{.EndSummary.If}}{{end}}],
+            dataLabels: {
+                format: '<div style="text-align:center"><span style="font-family:monospace;font-size:16px;color:' +
+                    ((Highcharts.theme && Highcharts.theme.contrastTextColor) || '#333') + '">{y}</span><br/>' +
+                       '<span style="font-size:12px;color:silver">%</span></div>'
+            }
+        }]
+
+    }));
+    {{end}}
+    {{if .HasHeart}}
+    //calculate from threshold power. Add note about this on app.
+
+    // The Heart Rate gauge
+    $('#container-avhr').highcharts(Highcharts.merge(gaugeOptions, {
+        yAxis: {
+            min: 50,
+            max: 100,
+            title: {
+                text: ''
+            }
+        },
+        credits: {
+            enabled: false
+        },
+
+        series: [{
+            name: 'Intensity',
+            data: [{{.EndSummary.IfHr}}],
+            dataLabels: {
+                format: '<div style="text-align:center"><span style="font-family:monospace;font-size:16px;color:' +
+                    ((Highcharts.theme && Highcharts.theme.contrastTextColor) || '#333') + '">{y}</span><br/>' +
+                       '<span style="font-size:12px;color:silver">%</span></div>'
+            },
+        }]
+
+    }));
+    {{end}}
+
+    /**
+    *
+    * Main overview chart
+    * 
+    **/
+    var $report = $('#report');
+    $('#container').highcharts({
+
+        chart: {
+            zoomType: 'x',
+            events: {
+                selection: function(event) {
+                    if (event.yAxis) {
+                        var min = event.xAxis[0].min, max = event.xAxis[0].max;
+
+                        var data = [];
+                        var series = [];
+                        var points = [];
+                        var n = 0;
+
+                        {{if .HasPower}}
+                        data[n] = {value: 0, count: 0};
+                        series[n] = event.currentTarget.series[n];
+                        points[n] = series[n].points;
+
+                        for (var i = 0; i < points[n].length; i++) {
+                            if (points[n][i].x >= min && points[n][i].x <= max) {
+                                data[n].value += points[n][i].y;
+                                data[n].count +=1;
+                            }
+                        }
+                        n++;
+                        {{end}}
+
+                        {{if .HasHeart}}
+                        data[n] = {value: 0, count: 0};
+                        series[n] = event.currentTarget.series[n];
+                        points[n] = series[n].points;
+
+                        for (var i = 0; i < points[n].length; i++) {
+                            if (points[n][i].x >= min && points[n][i].x <= max) {
+                                data[n].value += points[n][i].y;
+                                data[n].count +=1;
+                            }
+                        }
+                        n++;
+                        {{end}}
+
+                        {{if .HasCadence}}
+                        //need to omit zero vals
+                        var zeroVals = 0;
+                        data[n] = {value: 0, count: 0};
+                        series[n] = event.currentTarget.series[n];
+                        points[n] = series[n].points;
+
+                        for (var i = 0; i < points[n].length; i++) {
+                            if (points[0][i].x >= min && points[n][i].x <= max) {
+                                data[n].value += points[n][i].y;
+                                data[n].count +=1;
+                                if(points[n][i].y == 0){
+                                    zeroVals++;
+                                }
+                            }
+                        }
+                        {{end}}
+
+                        n = 0
+
+                        var totalSeconds = data[n].count;
+                        hours = Math.floor(totalSeconds / 3600);
+                        totalSeconds %= 3600;
+                        minutes = Math.floor(totalSeconds / 60);
+                        seconds = totalSeconds % 60;
+                        $report.html ('');
+                        $report.append('<h4>Selection average: <span class="value">'+ hours +'h' + minutes + 'm' + seconds + 's</span> duration</h4>');
+                        {{if .HasPower}}
+                        $report.append('Power:&nbsp;<span class="value">' + Math.floor(data[n].value / data[n].count) + '</span>Watts<br>');
+                        n++;
+                        {{end}}
+
+                        {{if .HasHeart}}
+                        $report.append('Heartrate:&nbsp;<span class="value">' + Math.floor(data[n].value / data[n].count) + '</span>bpm<br>');
+                        n++;
+                        {{end}}
+
+                        {{if .HasCadence}}
+                        $report.append('Cadence&nbsp;<span class="value">' + Math.floor(data[n].value / (data[n].count - zeroVals)) + '</span>rpm');
+                        {{end}}
+                    } else {
+                        $report.html ('Selection reset');
+                    }
+                }
+            }
+        },
+        title: {
+            text: ''
+        },
+        subtitle: {
+            text: document.ontouchstart === undefined ?
+                    'Click and drag in the plot area to zoom in' :
+                    'Pinch the chart to zoom in'
+        },
+        xAxis: {
+            type: 'datetime',
+
+        },
+        yAxis: {
+            title: {
+                text: 'Units'
+            }
+        },
+        legend: {
+            enabled: true
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            area: {
+                fillColor: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1},
+                    stops: [
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                    ]
+                },
+                marker: {
+                    //radius: 2
+                    enabled: false
+                },
+                lineWidth: 1,
+                states: {
+                    hover: {
+                        lineWidth: 1
+                    }
+                },
+                threshold: null
+            }
+        },
+
+
+        series: [
+        {{if .HasPower}}
+        {
+            type: 'area',
+            name: 'Power (W)',
+            pointInterval: 1000,
+            pointStart: Date.UTC(startDate.getYear(), startDate.getMonth(), startDate.getDate()),
+            data: [
+				{{range $row := .Data}}{{if $.HasPower}}{{$row.Power}},{{end}}{{end}}
+            ],
+        }, 
+        {{end}}
+        {{if .HasHeart}}
+        {
+            type: 'area',
+            name: 'Heart rate (BPM)',
+            pointInterval: 1000,
+            pointStart: Date.UTC(startDate.getYear(), startDate.getMonth(), startDate.getDate()),
+             data: [
+				{{range $row := .Data}}{{if $.HasHeart}}{{$row.Heartrate}},{{end}}{{end}}
+            ],
+        },
+        {{end}}
+        {{if .HasCadence}}
+        {
+            type: 'area',
+            name: 'Cadence (RPM)',
+            pointInterval: 1000,
+            pointStart: Date.UTC(startDate.getYear(), startDate.getMonth(), startDate.getDate()),
+             data: [
+				{{range $row := .Data}}{{if $.HasCadence}}{{$row.Cadence}},{{end}}{{end}}
+            ],
+        }
+        {{end}}
+        ]
+
+    });
+    
+
+    /**
+    *
+    * Power zone distribution charts
+    * 
+    **/
+    {{if .HasPower}}
+	$('#powerdist_chart').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotShadow: false
+        },
+        title: {
+            text: '',
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                },
+                startAngle: -90,
+                endAngle: 90,
+                center: ['50%', '75%']
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Power Zone',
+            innerSize: '50%',
+            data: [
+                ['Zone 1',   {{.ZoneData.Z1}}],
+                ['Zone 2',   {{.ZoneData.Z2}}],
+                ['Zone 3',   {{.ZoneData.Z3}}],
+                ['Zone 4',   {{.ZoneData.Z4}}],
+                ['Zone 5',   {{.ZoneData.Z5}}],
+                ['Zone 6',   {{.ZoneData.Z6}}],
+            ]
+        }]
+    });
+
+    var z1 = {{.ZoneData.Z1}};
+    var z2 = {{.ZoneData.Z2}};
+    var z3 = {{.ZoneData.Z3}};
+    var z4 = {{.ZoneData.Z4}};
+    var z5 = {{.ZoneData.Z5}};
+    var z6 = {{.ZoneData.Z6}};
+
+    var timeStringZ1 = '<span class="tt-time">Zone 1: ' + Math.floor(z1/3600) + 'h ' + Math.floor((z1/60)%60) + 'm ' + Math.floor(z1%60) + 's</span>';
+    var timeStringZ2 = '<span class="tt-time">Zone 2: ' + Math.floor(z2/3600) + 'h ' + Math.floor((z2/60)%60) + 'm ' + Math.floor(z2%60) + 's</span>';
+    var timeStringZ3 = '<span class="tt-time">Zone 3: ' + Math.floor(z3/3600) + 'h ' + Math.floor((z3/60)%60) + 'm ' + Math.floor(z3%60) + 's</span>';
+    var timeStringZ4 = '<span class="tt-time">Zone 4: ' + Math.floor(z4/3600) + 'h ' + Math.floor((z4/60)%60) + 'm ' + Math.floor(z4%60) + 's</span>';
+    var timeStringZ5 = '<span class="tt-time">Zone 5: ' + Math.floor(z5/3600) + 'h ' + Math.floor((z5/60)%60) + 'm ' + Math.floor(z5%60) + 's</span>';
+    var timeStringZ6 = '<span class="tt-time">Zone 6: ' + Math.floor(z6/3600) + 'h ' + Math.floor((z6/60)%60) + 'm ' + Math.floor(z6%60) + 's</span>';
+
+    $('#power-bar').highcharts({
+        chart: {
+            type: 'bar'
+        },
+        title: {
+            text: ''
+        },
+        xAxis: {
+            categories: ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5', 'Zone 6'],
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Time',
+                align: 'high'
+            },
+            labels: {
+                overflow: 'justify'
+            }
+        },
+        tooltip: {
+            valueSuffix: ' Seconds',
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+           name: 'Time in Zone',
+            data: [{
+                y:{{.ZoneData.Z1}},
+                name: timeStringZ1,
+            },{
+                y:{{.ZoneData.Z2}},
+                name: timeStringZ2
+            },{
+                y:{{.ZoneData.Z3}},
+                name: timeStringZ3
+            },{
+                y:{{.ZoneData.Z4}},
+                name: timeStringZ4
+            },{ 
+                y:{{.ZoneData.Z5}},
+                name: timeStringZ5
+            },{ 
+                y:{{.ZoneData.Z6}},
+                name: timeStringZ6
+            }],
+        }]
+    });
+    {{end}}
+
+    /**
+    *
+    * Heart zone distribution charts
+    * 
+    **/
+    {{if .HasHeart}}
+    $('#heartdist_chart').highcharts({
+        chart: {
+            plotBackgroundColor: null,
+            plotShadow: false
+        },
+        title: {
+            text: '',
+        },
+        tooltip: {
+            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+        },
+        credits: {
+            enabled: false
+        },
+        plotOptions: {
+            pie: {
+                allowPointSelect: true,
+                cursor: 'pointer',
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                },
+                startAngle: -90,
+                endAngle: 90,
+                center: ['50%', '75%']
+            }
+        },
+        series: [{
+            type: 'pie',
+            name: 'Power Zone',
+            innerSize: '50%',
+            data: [
+                ['Zone 1',   {{.ZoneData.HR1}}],
+                ['Zone 2',   {{.ZoneData.HR2}}],
+                ['Zone 3',   {{.ZoneData.HR3}}],
+                ['Zone 4',   {{.ZoneData.HR4}}],
+                ['Zone 5a',   {{.ZoneData.HR5a}}],
+                ['Zone 5b',   {{.ZoneData.HR5b}}],
+                ['Zone 5c',   {{.ZoneData.HR5c}}],
+            ]
+        }]
+    });
+
+    var hr1 = {{.ZoneData.HR1}};
+    var hr2 = {{.ZoneData.HR2}};
+    var hr3 = {{.ZoneData.HR3}};
+    var hr4 = {{.ZoneData.HR4}};
+    var hr5a = {{.ZoneData.HR5a}};
+    var hr5b = {{.ZoneData.HR5b}};
+    var hr5c = {{.ZoneData.HR5c}};
+
+    var timeStringHR1 = '<span class="tt-time">Zone 1: ' + Math.floor(hr1/3600) + 'h ' + Math.floor((hr1/60)%60) + 'm ' + Math.floor(hr1%60) + 's</span>';
+    var timeStringHR2 = '<span class="tt-time">Zone 2: ' + Math.floor(hr2/3600) + 'h ' + Math.floor((hr2/60)%60) + 'm ' + Math.floor(hr2%60) + 's</span>';
+    var timeStringHR3 = '<span class="tt-time">Zone 3: ' + Math.floor(hr3/3600) + 'h ' + Math.floor((hr3/60)%60) + 'm ' + Math.floor(hr3%60) + 's</span>';
+    var timeStringHR4 = '<span class="tt-time">Zone 4: ' + Math.floor(hr4/3600) + 'h ' + Math.floor((hr4/60)%60) + 'm ' + Math.floor(hr4%60) + 's</span>';
+    var timeStringHR5a = '<span class="tt-time">Zone 5a: ' + Math.floor(hr5a/3600) + 'h ' + Math.floor((hr5a/60)%60) + 'm ' + Math.floor(hr5a%60) + 's</span>';
+    var timeStringHR5b = '<span class="tt-time">Zone 5b: ' + Math.floor(hr5b/3600) + 'h ' + Math.floor((hr5b/60)%60) + 'm ' + Math.floor(hr5b%60) + 's</span>';
+    var timeStringHR5c = '<span class="tt-time">Zone 5c: ' + Math.floor(hr5c/3600) + 'h ' + Math.floor((hr5c/60)%60) + 'm ' + Math.floor(hr5c%60) + 's</span>';
+
+    $('#heart-bar').highcharts({
+        chart: {
+            type: 'bar'
+        },
+        title: {
+            text: ''
+        },
+        xAxis: {
+            categories: ['Zone 1', 'Zone 2', 'Zone 3', 'Zone 4', 'Zone 5a', 'Zone 5b', 'Zone 5c'],
+        },
+        yAxis: {
+            min: 0,
+            title: {
+                text: 'Time',
+                align: 'high'
+            },
+            labels: {
+                overflow: 'justify'
+            }
+        },
+        tooltip: {
+            valueSuffix: ' Seconds',
+        },
+        credits: {
+            enabled: false
+        },
+        series: [{
+           name: 'Time in Zone',
+            data: [{
+                y:{{.ZoneData.HR1}},
+                name: timeStringHR1
+            },{
+                y:{{.ZoneData.HR2}},
+                name: timeStringHR2
+            },{
+                y:{{.ZoneData.HR3}},
+                name: timeStringHR3
+            },{
+                y:{{.ZoneData.HR4}},
+                name: timeStringHR4
+            },{ 
+                y:{{.ZoneData.HR5a}},
+                name: timeStringHR5a
+            },{ 
+                y:{{.ZoneData.HR5b}},
+                name: timeStringHR5b
+            },{ 
+                y:{{.ZoneData.HR5c}},
+                name: timeStringHR5c
+            }],
+        }]
+    });
+    {{end}}
+
+
+
+});
+</script>
+
+{{if .Demo}}<style>.section-ln{background-color: white}</style>{{end}}
+</head>
+
+<body class="analysis-page-body">
+<section class="section-ln">
+    <h5 class="m-message">{{.Message}}</h5>
+    <div class="col-1-1">
+        <h1 class="heading-gray"><em>{{.Title}}</em> <strong>{{ .ActivityMeta.ActivityName}}</strong></h1>
+    </div>
+    
+	<div class="col-1-2">  
+        <h3>Ride summary</h3>    
+		<table>
+			{{if .EndSummary.StartTime}}<tr><td>Start: </td><td><span class="value">{{.EndSummary.StartTime}}</span></td></tr>{{end}}
+			{{if .EndSummary.Dur}}<tr><td>Duration: </td><td><span class="value">{{.EndSummary.Dur}}</span></td></tr>{{end}}
+			{{if .EndSummary.Avpower}}<tr><td>Average power: </td><td><span class="value">{{.EndSummary.Avpower}}</span> Watts</td></tr>{{end}}
+			{{if .EndSummary.Np}}<tr><td>Adjusted power<sup>&dagger;</sup>: </td><td><span class="value">{{.EndSummary.Np}}</span> Watts</td></tr>{{end}}
+			{{if .EndSummary.If}}<tr><td>Intensity<sup>&dagger;</sup>: </td><td><span class="value">{{.EndSummary.If}}</span>%</td></tr>{{end}}
+            {{if .EndSummary.Tss}}<tr><td>Training load<sup>&dagger;</sup>:</td><td><span class="value">{{.EndSummary.Tss}}</span> (Calculated from power) </td></tr>{{end}}
+            {{if .EndSummary.Etss}}<tr><td>Training load<sup>&dagger;</sup>:</td><td><span class="value">{{.EndSummary.Etss}}</span> (Calculated from heart rate) </td></tr>{{end}}
+			{{if .EndSummary.Avheart}}<tr><td>Average heart rate: </td><td><span class="value">{{.EndSummary.Avheart}}</span> BPM</td></tr>{{end}}
+            {{if .EndSummary.WorkDone}}<tr><td>Work done: </td><td><span class="value">{{.EndSummary.WorkDone}}</span> kJ</td></tr>{{end}}
+            {{if .EndSummary.EnergyUsedKj}}<tr><td>Energy used: </td><td><span class="value">{{.EndSummary.EnergyUsedKj}}</span> kJ or <span class="value">{{.EndSummary.EnergyUsedKc}}</span> kcal</td></tr>{{end}}
+			{{if .EndSummary.Avcad}}<tr><td>Average cadence: </td><td><span class="value">{{.EndSummary.Avcad}}</span> RPM</td></tr>{{end}}
+            <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+        </table>
+    </div>
+    <div class="col-1-2">    
+        <form id="activity-meta" action="#">
+            <input type="hidden" name="activity_name" id="activity-name" value="{{ .ActivityMeta.ActivityName}}">
+
+            <h3>About your ride</h3>
+            <table>
+                <tr class="table-group">
+                    <td>Motivation level:</td>
+                    <td>
+                        <select name="motivation_level" id="motivation_level">
+                            <option>Choose…</option>
+                            <option value="1">Much lower than normal</option>
+                            <option value="2">Lower than normal</option>
+                            <option value="3">Normal</option>
+                            <option value="4">Higher than normal</option>
+                            <option value="5">Much higher than normal</option>
+                        </select>
+                    </td>
+                </tr>
+
+                <tr class="table-group">
+                    <td>Perceived effort:</td>
+                    <td>
+                        <select name="perceived_effort" id="perceived_effort">
+                            <option>Choose…</option>
+                            <option value="1">Much easier than expected</option>
+                            <option value="2">Easier than expected</option>
+                            <option value="3">As expected</option>
+                            <option value="4">Harder than expected</option>
+                            <option value="5">Much harder than expected</option>
+                        </select>
+                    </td>
+                </tr>
+
+                <tr class="table-group">
+                    <td>Indoors or Outdoors<abbr title="Many find their FTP to be higher outdoors - checking this allows you to filter and compare like for like">?</abbr></td>
+                    <td>
+                        <input type="radio" id="indoor" name="in_or_out" value="in" {{if .ActivityMeta.IndoorRide}}checked="checked"{{end}}>
+                        <label for="indoor">Indoor trainer</label><br>
+                        <input type="radio" id="outdoor" name="in_or_out" value="out" {{if .ActivityMeta.OutdoorRide}}checked="checked"{{end}}>
+                        <label for="outdoor">Outdoor ride</label>
+                    </td>
+                </tr>
+
+                <tr class="table-group">
+                    <td>Competitive ride<abbr title="Races, but may include chaingangs or club bashes etc. The point is to determine if or by how much performance was enhanced by competitive factors">?</abbr></td>
+                    <td>
+                        <input type="radio" id="race" name="race_or_train" value="race" {{if .ActivityMeta.Race}}checked="checked"{{end}}>
+                        <label for="race">Competitive ride</label><br>
+                        <input type="radio" id="train" name="race_or_train" value="train" {{if .ActivityMeta.Train}}checked="checked"{{end}}>
+                        <label for="train">Non-competitive ride</label>
+                    </td>
+                </tr>
+
+                <tr class="table-group">
+                    <td>Training load<sup>&dagger;</sup> override: </td>
+                    <td>
+                        <input type="number" name="tss" value="{{.ActivityMeta.TssOverride}}" />
+                        <button class="btn-default" type="submit">Save changes</button>
+                    </td>
+                </tr>
+
+                <tr class="table-group">
+                    <td>Don't include in Performance Chart<abbr title="Rides which skew your performance chart data but you don't want to delete">?</abbr></td>
+                    <td>
+                        <input type="checkbox" name="omit-from-pc" value="1" {{if .ActivityMeta.OmitFromPC}}checked="checked"{{end}} >
+                    </td>
+                </tr>
+    	   </table>
+       </form>
+	</div>
+    <div style=clear:both></div>
+    
+    <div class="col-1-4">
+        <h3>Intensity (Power)</h3>
+        <div id="container-intensity" class="chart" style="height: 200px"></div>
+    </div>
+
+    <div class="col-1-4">
+        <h3>Intensity (Hr)</h3>
+        <div id="container-avhr" class="chart"  style="height: 200px"></div>
+    </div>
+
+
+    <div class="col-1-2">
+        <h3>Lap summaries</h3>
+
+        <div class="laps-container">
+            <table>
+                <tr>
+                    <th>Lap</th>
+                    <th>Duration</th>
+                    <th>Average Power</th>
+                    <th>Average HR</th>
+                    <th>Cadence</th>
+                </tr>
+               {{range $index, $lapSummaries := .LapSummaries}}
+                <tr class="summary-row">
+                    <td><script>document.write(Number({{printf "%d" $index  }})+ 1)</script></td>
+                    <td> {{if $lapSummaries.Dur}}{{$lapSummaries.Dur}}{{end}}</td> 
+                    <td>{{if $lapSummaries.Avpower}}{{$lapSummaries.Avpower}} Watts {{else}}N/A{{end}}</td> 
+                    <td>{{if $lapSummaries.Avheart}}{{$lapSummaries.Avheart}} BPM {{else}}N/A{{end}}</td>
+                    <td>{{if $lapSummaries.Avcad}}{{$lapSummaries.Avcad}} RPM {{else}}N/A{{end}}</td>
+                </tr>   
+               {{end}}
+               <a class="clear-selection" style="cursor:pointer">Clear selection [x]</a>
+            </table>      
+        </div>
+    </div>
+
+    <div class="col-1-1">
+        <h3>Activity Overview</h3>
+        <div id="report"></div>
+        <div id="container" class="chart" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+    </div>
+</section>
+
+
+{{if .HasPower}}
+<section class="section-ln">
+    <div class="col-1-1">
+        <h1 class="heading-gray">Power</h1>
+    </div>
+    <div class="col-1-2">
+        <h3>Power distribution by zone (Percent)</h3>
+    	<div id="powerdist_chart" class="chart" style="width: 100%; height: 300px;">Loading...!</div>
+    </div>
+    <div class="col-1-2">
+        <h3>Power distribution by zone (volume)</h3>
+        <div id="power-bar" class="chart" style="width: 100%; height: 300px;">Loading...!</div>
+    </div>
+    <div class="col-1-2">
+        <h3>Mean Maximal power</h3>
+        <div id="cpc_chart" class="chart" style="width: 100%; height: 250px">Loading...!</div>
+    </div>
+    <div class="col-1-2">
+        <h3>Mean Maximal @ Duration</h3>
+        <table>
+            {{if .CPM.FiveSecondCP}}<tr><td>5 second: </td><td><span class="value">{{.CPM.FiveSecondCP}}</span> Watts</td></tr>{{end}}
+            {{if .CPM.TwentySecondCP}}<tr><td>20 second: </td><td><span class="value">{{.CPM.TwentySecondCP}}</span> Watts</td></tr>{{end}}
+            {{if .CPM.SixtySecondCP}}<tr><td>60 second: </td><td><span class="value">{{.CPM.SixtySecondCP}}</span> Watts</td></tr>{{end}}
+            {{if .CPM.FiveMinuteCP}}<tr><td>5 minute: </td><td><span class="value">{{.CPM.FiveMinuteCP}}</span> Watts</td></tr>{{end}}
+            {{if .CPM.TwentyMinuteCP}}<tr><td>20 minute: </td><td><span class="value">{{.CPM.TwentyMinuteCP}}</span> Watts</td></tr>{{end}}
+            {{if .CPM.SixtyMinuteCP}}<tr><td>60 minute: </td><td><span class="value">{{.CPM.SixtyMinuteCP}}</span> Watts</td></tr>{{end}}
+        </table>  
+    </div>
+</section>
+{{end}}
+
+{{if .HasHeart}}
+ <section class="section-ln">
+    <div class="col-1-1">
+        <h1 class="heading-gray">Heart</h1>
+    </div>
+    <div class="col-1-2">
+        <h3>Heartrate distribution by zone (Percent)</h3>
+        <div id="heartdist_chart" class="chart" style="width: 100%; height: 300px;">Loading...!</div>
+    </div>
+    <div class="col-1-2">
+        <h3>Heartrate distribution by zone (Volume)</h3>
+        <div id="heart-bar" class="chart" style="width: 100%; height: 300px;">Loading...!</div>
+    </div>
+</section>
+{{end}}
+<section class="section-ln">
+    <span class="note"><sup>&dagger;</sup>Since our site is performing many of the same functions as <b>TrainingPeaks</b>, we have been asked by them to stop using their trademarks which include TSS, IF, Training Stress Score, NP and Normalized Power. We therefore use our own descriptors where required to do so.</span>
+</section>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-59961992-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+<script>
+    jQuery('.summary-row').on('click', function(e){
+        if($(this).css("background-color") == "rgb(235, 235, 235)"){
+            $(this).removeAttr('style');
+        }else{
+           $(this).css("background-color","rgb(235, 235, 235)");
+        } 
+    });
+    jQuery('.clear-selection').on('click', function(){
+        $('.summary-row').removeAttr('style');
+    });
+    //set form fields to their saved values
+    jQuery('#motivation_level option').each(function(){
+        if(jQuery(this).val() == Number({{.ActivityMeta.MotivationLevel}})){
+            jQuery(this).attr('selected','selected');
+        }
+    });
+    jQuery('#perceived_effort option').each(function(){
+        if(jQuery(this).val() == Number({{.ActivityMeta.PerceivedEffort}})){
+            jQuery(this).attr('selected','selected');
+        }
+    });
+
+
+</script>
+
+</body>
+</html>
