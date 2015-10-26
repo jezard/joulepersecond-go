@@ -2,7 +2,7 @@ package utility
 
 import (
 	"crypto/rc4"
-	"github.com/jezard/jps-go/conf"
+	"github.com/jezard/joulepersecond-go/conf"
 	"math"
 )
 

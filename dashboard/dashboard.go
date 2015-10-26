@@ -7,10 +7,10 @@ import (
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gocql/gocql"
-	"github.com/jezard/jps-go/conf"
-	"github.com/jezard/jps-go/types" //?? http://grokbase.com/t/gg/golang-nuts/135g1sqdbr/go-nuts-using-a-struct-defined-in-a-package ??
-	"github.com/jezard/jps-go/usersettings"
-	"github.com/jezard/jps-go/utility"
+	"github.com/jezard/joulepersecond-go/conf"
+	"github.com/jezard/joulepersecond-go/types" //?? http://grokbase.com/t/gg/golang-nuts/135g1sqdbr/go-nuts-using-a-struct-defined-in-a-package ??
+	"github.com/jezard/joulepersecond-go/usersettings"
+	"github.com/jezard/joulepersecond-go/utility"
 	"html/template"
 	"net/http"
 	"strings"

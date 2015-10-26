@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/jezard/jps-go/activity"
-	"github.com/jezard/jps-go/analysis"
-	"github.com/jezard/jps-go/dashboard"
+	"github.com/jezard/joulepersecond-go/activity"
+	"github.com/jezard/joulepersecond-go/analysis"
+	"github.com/jezard/joulepersecond-go/dashboard"
 	"net/http"
 )
 

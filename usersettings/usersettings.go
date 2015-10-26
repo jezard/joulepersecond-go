@@ -5,9 +5,9 @@ import (
 	"database/sql"
 	//"fmt"
 	_ "github.com/go-sql-driver/mysql" //go get github.com/go-sql-driver/mysql
-	"github.com/jezard/jps-go/conf"
-	"github.com/jezard/jps-go/types"
-	"github.com/jezard/jps-go/utility"
+	"github.com/jezard/joulepersecond-go/conf"
+	"github.com/jezard/joulepersecond-go/types"
+	"github.com/jezard/joulepersecond-go/utility"
 	"net/url"
 	"strings"
 	"time"

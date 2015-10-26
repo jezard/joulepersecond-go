@@ -27,3 +27,4 @@ _testmain.go
 
 conf.json
 conf.go
+supervisord.conf
