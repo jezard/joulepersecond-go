@@ -83,7 +83,24 @@
 window.addEventListener('message',function(e) {
     if (e.origin == 'http://joulepersecond.com') {
         if(e.data != ""){//don't override the existing value with a blank
-            jQuery('#activity-name').val(e.data);
+            jQuery('#activity-name').val(e.data.title);
+            jQuery('#standard-ride-id').val(e.data.standard_ride_id);
+
+            //submit the other values here
+            if(e.data.in_or_out == 'in'){
+                jQuery('#indoor').prop('checked',true);
+            }
+            if(e.data.in_or_out == 'out'){
+                jQuery('#outdoor').prop('checked',true);
+            }
+
+            if(e.data.race_or_train == 'race'){
+                jQuery('#race').prop('checked',true);
+            }
+            if(e.data.race_or_train == 'train'){
+                jQuery('#train').prop('checked',true);
+            }
+
             jQuery('#activity-meta').submit();
         }
        
@@ -662,6 +679,7 @@ $(function () {
     <div class="col-1-2">    
         <form id="activity-meta" action="#">
             <input type="hidden" name="activity_name" id="activity-name" value="{{ .ActivityMeta.ActivityName}}">
+            <input type="hidden" name="standard_ride_id" id="standard-ride-id" value="{{ .ActivityMeta.StandardRideId}}">
 
             <h3>About your ride</h3>
             <table>

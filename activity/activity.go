@@ -49,10 +49,10 @@ type CpRow struct {
 
 //store various types of information about an activity - 1 record per activity
 type ActivityMeta struct {
-	ActivityName, ActivityID                      string
-	TssOverride, MotivationLevel, PerceivedEffort int
-	IndoorRide, OutdoorRide, Race, Train          bool
-	OmitFromPC                                    bool //omit ride from performance chart
+	ActivityName, ActivityID                                      string
+	TssOverride, MotivationLevel, PerceivedEffort, StandardRideId int
+	IndoorRide, OutdoorRide, Race, Train                          bool
+	OmitFromPC                                                    bool //omit ride from performance chart
 }
 
 //struct for html page template
@@ -226,6 +226,17 @@ func ActivityHandler(w http.ResponseWriter, r *http.Request) {
 					//add/update the database with the new values
 					if err := session.Query(`INSERT INTO activity_meta (activity_id, perceived_effort ) VALUES (?, ?)`,
 						activityId, meta.PerceivedEffort).Exec(); err != nil {
+						log.Printf("Location:%v", err)
+					}
+				}
+
+				//standard ride id
+				standardRideId, err := strconv.Atoi(r.FormValue("standard_ride_id"))
+				if standardRideId != 0 && user.Demo == false {
+					meta.StandardRideId = standardRideId
+					//add/update the database with the new values
+					if err := session.Query(`INSERT INTO activity_meta (activity_id, standard_ride_id ) VALUES (?, ?)`,
+						activityId, meta.StandardRideId).Exec(); err != nil {
 						log.Printf("Location:%v", err)
 					}
 				}
