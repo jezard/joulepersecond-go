@@ -232,6 +232,7 @@ func ActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 				//standard ride id
 				standardRideId, err := strconv.Atoi(r.FormValue("standard_ride_id"))
+
 				if standardRideId != 0 && user.Demo == false {
 					meta.StandardRideId = standardRideId
 					//add/update the database with the new values

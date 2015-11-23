@@ -83,6 +83,7 @@
 window.addEventListener('message',function(e) {
     if (e.origin == 'http://joulepersecond.com') {
         if(e.data != ""){//don't override the existing value with a blank
+            console.log(e.data.standard_ride_id);
             jQuery('#activity-name').val(e.data.title);
             jQuery('#standard-ride-id').val(e.data.standard_ride_id);
 
