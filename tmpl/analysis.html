@@ -800,12 +800,7 @@ $(function () {
                 <label id="chk-heart" for="chk-hvp">Performance Chart [<a style="cursor:pointer">More options</a> <mark class="arrow" title="" style="color: initial; background-color: transparent">&#x25BD;</mark>]</label>
                 <input id="chk-hvp" type="checkbox" name="show-hvp" value="checked" {{if .Filter.ShowHvp}}checked="checked"{{end}} disabled="disabled">
                 <div id="pc-options">
-                    <label for="standard_ride_types">Filter by standard ride types</label>
-                    <select mulitple name="standard_rides[]">
-                        {{range $standard_ride := .Settings.StandardRides}}
-                        <option value="{{$standard_ride.Id}}">{{$standard_ride.Label}}</option>
-                        {{end}}
-                    </select><br>
+                    
                     <label for="hvp-from">Activities from duration (minutes)</label>
                     <input type="number" id="hvp-from" name="hvp-from" value="{{.Filter.HvpFrom}}" /><br>
                     <label for="hvp-to">Activities to duration (minutes)</label>
@@ -823,6 +818,10 @@ $(function () {
                     <label for="has-heart">Has Heartrate data</label>
                     <input type="checkbox" id="has-heart" name="has-heart" value="true" {{if .Filter.HeartData}}checked="checked"{{end}}/>
                 </div>
+                <select multiple="multiple" name="standard_rides[]" id="standard-rides-filter">
+                    <option disabled value="0">Filter by standard ride types</option>
+                    {{.StandardRidesHTML}}
+                </select><br>
 
                 <script>
                     jQuery('#is-indoor, #is-outdoor').on("change", function(e){

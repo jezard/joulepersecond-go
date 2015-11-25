@@ -107,6 +107,7 @@ type Page struct {
 	Settings                        types.UserSettings
 	Filter                          Filter
 	ZoneLabels                      types.ZoneLabels
+	StandardRidesHTML               template.HTML
 }
 type Filter struct { //need to refactor some of the filters in Page struct into here...
 	Race, Train, Indoor, Outdoor, HeartData                              bool
@@ -117,6 +118,7 @@ type Filter struct { //need to refactor some of the filters in Page struct into 
 	ShowCPs                                                              bool //whether user wishes to show notable CPs on graph
 	HvpTo, HvpFrom                                                       int  //time in minutes
 	OffsetDays                                                           int  //number of days to end filter period
+	StandardRides                                                        []int
 }
 
 //create a data type to represent aggregated sample data
@@ -294,6 +296,11 @@ func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
 			user.Theme = theme.Value
 		}
 
+		//standard rides
+		if err := r.ParseForm(); err != nil {
+			// handle error
+		}
+
 		//only restrict filter to subscribers if over max value
 		if filter.Historylen > history_days {
 
@@ -315,6 +322,12 @@ func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
 					filter.Historylen = history_days
 				}
 			}
+		}
+
+		sr := r.Form["standard_rides[]"]
+		for i := 0; i < len(sr); i++ {
+			standard_ride, _ := strconv.Atoi(sr[i])
+			filter.StandardRides = append(filter.StandardRides, standard_ride)
 		}
 
 		p := view(user, filter)
@@ -630,6 +643,8 @@ func hvp(user types.UserSettings, filter Filter) []Hvp {
 	var thisCp int
 	var thisAvHr int
 	var thisAvCad int
+	var standard_ride_id int
+	standardRideSelection := false
 
 	cluster := gocql.NewCluster(config.DbHost)
 	cluster.Keyspace = "joulepersecond"
@@ -678,16 +693,36 @@ func hvp(user types.UserSettings, filter Filter) []Hvp {
 		json.Unmarshal(end_summary_json, &user_data)
 
 		//we will filter based on the results of this query
-		session.Query(`SELECT activity_id, activity_name, is_indoor, is_outdoor, is_race, is_training, omit_from_pc FROM activity_meta WHERE activity_id = ?`, activity_id).Scan(
+		session.Query(`SELECT activity_id, activity_name, is_indoor, is_outdoor, is_race, is_training, omit_from_pc, standard_ride_id FROM activity_meta WHERE activity_id = ?`, activity_id).Scan(
 			&hvp_data_point.Meta.ActivityID, //even though we already have the id, we collect it here as a determinant of the presence acitivity meta data
 			&hvp_data_point.Meta.ActivityName,
 			&hvp_data_point.Meta.IndoorRide,
 			&hvp_data_point.Meta.OutdoorRide,
 			&hvp_data_point.Meta.Race,
 			&hvp_data_point.Meta.Train,
-			&omitFromPC)
+			&omitFromPC,
+			&standard_ride_id)
 
 		//As there are no table joins we need to filter off unwanted activities through code...:
+		for s := 0; s < len(filter.StandardRides); s++ {
+			if filter.StandardRides[s] > 0 { //default
+				standardRideSelection = true
+			}
+		}
+
+		//if the user has made one or more selections discard as necessary for each that isn't in the array/list of standard rides
+		if standardRideSelection {
+			var conforms = false
+			//in array?
+			for t := 0; t < len(filter.StandardRides); t++ {
+				if standard_ride_id == filter.StandardRides[t] {
+					conforms = true
+				}
+			}
+			if !conforms {
+				continue //skip to next record
+			}
+		}
 
 		var f1, f2, f3, f4 bool //filter flags
 
@@ -1340,22 +1375,34 @@ func view(user types.UserSettings, filter Filter) (p Page) {
 	for i := len(cpData) - 1; i >= 0; i-- {
 		cpDataRev = append(cpDataRev, cpData[i])
 	}
+	selectHTML := template.HTML("")
+
+	for _, userval := range user.StandardRides { //for each of the user's standard rides
+		selected := ""
+		for _, filterval := range filter.StandardRides { //test for a filter match
+			if userval.Id == filterval {
+				selected = "selected"
+			}
+		}
+		selectHTML += template.HTML("<option " + selected + " value=" + strconv.Itoa(userval.Id) + ">" + userval.Label + "</option>")
+	}
 
 	p = Page{
-		FfData:     ffData,
-		CpData:     cpDataRev,
-		HvpData:    hvpData,
-		TvdData:    tvdData,
-		TvdLegend:  tvdLegend,
-		CpLegend1:  legends.Series1,
-		CpLegend2:  legends.Series2,
-		CpLegend3:  legends.Series3,
-		HvpLabel:   hvp_label,
-		HbzData:    hbzData,
-		PbzData:    pbzData,
-		Settings:   user,
-		Filter:     filter,
-		ZoneLabels: zoneLabels,
+		FfData:            ffData,
+		CpData:            cpDataRev,
+		HvpData:           hvpData,
+		TvdData:           tvdData,
+		TvdLegend:         tvdLegend,
+		CpLegend1:         legends.Series1,
+		CpLegend2:         legends.Series2,
+		CpLegend3:         legends.Series3,
+		HvpLabel:          hvp_label,
+		HbzData:           hbzData,
+		PbzData:           pbzData,
+		Settings:          user,
+		Filter:            filter,
+		ZoneLabels:        zoneLabels,
+		StandardRidesHTML: selectHTML,
 	}
 	return
 }
