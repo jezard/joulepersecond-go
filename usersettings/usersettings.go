@@ -27,9 +27,11 @@ func Get(enc_uid string) (user types.UserSettings, _err error) {
 	db, err := sql.Open("mysql", conf.MySQLUser+":"+conf.MySQLPass+"@tcp("+conf.MySQLHost+":3306)/"+conf.MySQLDB)
 
 	var paid_account bool
-	var my_ftp, my_thr, my_rhr, my_weight, set_ncp_rolloff, my_age, set_data_cutoff int
-	var set_autofill, my_gender string
+	var my_ftp, my_thr, my_rhr, my_weight, set_ncp_rolloff, my_age, set_data_cutoff, id int
+	var set_autofill, my_gender, ride_label string
 	var my_vo2 float32
+	var standard_ride types.StandardRide
+	var standard_rides []types.StandardRide
 
 	err = db.QueryRow("SELECT paid_account, my_ftp, my_thr, my_rhr, my_weight, set_ncp_rolloff, set_autofill, set_data_cutoff, my_age, my_vo2, my_gender FROM user WHERE email=?", uid).Scan(
 		&paid_account,
@@ -44,8 +46,19 @@ func Get(enc_uid string) (user types.UserSettings, _err error) {
 		&my_vo2,
 		&my_gender,
 	)
+
 	if err != nil {
 		_err = err
+	}
+	//get the user's standard rides
+	rows, err := db.Query("SELECT id, ride_label FROM standard_rides WHERE email=?", uid)
+	defer rows.Close()
+
+	for rows.Next() {
+		rows.Scan(&id, &ride_label)
+		standard_ride.Id = id
+		standard_ride.Label = ride_label
+		standard_rides = append(standard_rides, standard_ride)
 	}
 	defer db.Close()
 
@@ -63,6 +76,7 @@ func Get(enc_uid string) (user types.UserSettings, _err error) {
 	user.Age = my_age
 	user.Vo2 = my_vo2
 	user.Gender = my_gender
+	user.StandardRides = standard_rides
 
 	//hardcoded (for now) settings
 	user.Atl_constant = 7

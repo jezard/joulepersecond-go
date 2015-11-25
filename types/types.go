@@ -6,28 +6,34 @@ import (
 	"time"
 )
 
+type StandardRide struct {
+	Id    int
+	Label string
+}
+
 //user settings
 type UserSettings struct {
-	EncId        string
-	Id           string //user me%40mydomain.co.uk
-	Email        string //user me@mydomain.co.uk
-	Paid_account bool   //user has a subscription
-	Atl_constant int    //ATL constant - default 7 Days
-	Ctl_constant int    //CTL constant - default 42 Days
-	Theme        string
-	Demo         bool          //is this a demo?
-	TimeOffset   int           //view dashboard history from a previous day - useful for testing if nothing else
-	SampleSize   int           //might use this to adjust user selected sample size
-	Ftp          int           //user's Functional Threshold Power
-	Thr          int           //User's functional threshold Heartrate
-	Ncp_rolloff  int           //User set Notable Critical Power performance rolloff constant
-	Stopgap      time.Duration //number of seconds to trigger auto removal from activity (default 15)
-	Autofill     string        //whether to replace missing values with last recorded sample data (default), set to zero or remove. Options 'autofill', 'setzero', 'remove'
-	Rhr          int           //user's resting heart rate
-	Vo2          float32       //user's vo2 Max
-	Gender       string        //user's gender
-	Weight       int           //user's weight
-	Age          int           //user's age
+	EncId         string
+	Id            string //user me%40mydomain.co.uk
+	Email         string //user me@mydomain.co.uk
+	Paid_account  bool   //user has a subscription
+	Atl_constant  int    //ATL constant - default 7 Days
+	Ctl_constant  int    //CTL constant - default 42 Days
+	Theme         string
+	Demo          bool           //is this a demo?
+	TimeOffset    int            //view dashboard history from a previous day - useful for testing if nothing else
+	SampleSize    int            //might use this to adjust user selected sample size
+	Ftp           int            //user's Functional Threshold Power
+	Thr           int            //User's functional threshold Heartrate
+	Ncp_rolloff   int            //User set Notable Critical Power performance rolloff constant
+	Stopgap       time.Duration  //number of seconds to trigger auto removal from activity (default 15)
+	Autofill      string         //whether to replace missing values with last recorded sample data (default), set to zero or remove. Options 'autofill', 'setzero', 'remove'
+	Rhr           int            //user's resting heart rate
+	Vo2           float32        //user's vo2 Max
+	Gender        string         //user's gender
+	Weight        int            //user's weight
+	Age           int            //user's age
+	StandardRides []StandardRide //user's standard rides
 }
 
 type CPMs struct {
