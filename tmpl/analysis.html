@@ -382,7 +382,7 @@ $(function () {
         },
         yAxis: [{
             title: {
-                text: 'Av. Watts / bpm / rpm'
+                text: 'Av. Watts / bpm / rpm / %'
             },
             min: 40,
             startOnTick: false
@@ -431,12 +431,12 @@ $(function () {
             regressionSettings: {
                 type: 'polynomial',
                 dashStyle:"LongDash",
-                name: 'HR to W ratio',
+                name: 'BPM to W ratio trend (%)',
                 color: linecolors[0],
                 index: -1,
                 states: {hover:{enabled: false}}
             },
-            name: 'HR to W ratio',
+            name: 'BPM to W ratio %',
             marker: {
                 radius: 3
             },
