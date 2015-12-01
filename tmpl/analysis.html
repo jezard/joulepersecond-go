@@ -431,6 +431,31 @@ $(function () {
             regressionSettings: {
                 type: 'polynomial',
                 dashStyle:"LongDash",
+                name: 'HR to W ratio',
+                color: linecolors[0],
+                index: -1,
+                states: {hover:{enabled: false}}
+            },
+            name: 'HR to W ratio',
+            marker: {
+                radius: 3
+            },
+
+            // Define the data points. All series have a dummy year
+            // of 1970/71 in order to be compared on the same x axis. Note
+            // that in JavaScript, months start at 0 for January, 1 for February etc.
+            data: [
+                {{range $hvpdata := .HvpData}}[Date.UTC({{$hvpdata.Year}},{{$hvpdata.Month}},{{$hvpdata.Day}}), {{$hvpdata.AvPower}}/{{$hvpdata.AvHeartRate}}*100],{{end}}
+            ]
+        }, {
+            stickyTracking: false,
+            index:0,
+            visible: false,
+            regression: true ,
+            regressionSettings: {
+                active: false,//here
+                type: 'polynomial',
+                dashStyle:"LongDash",
                 name: 'Av. heartrate trend (bpm)',
                 color: linecolors[0],
                 index: -1,
@@ -447,11 +472,13 @@ $(function () {
             data: [
                 {{range $hvpdata := .HvpData}}[Date.UTC({{$hvpdata.Year}},{{$hvpdata.Month}},{{$hvpdata.Day}}),{{$hvpdata.AvHeartRate}}],{{end}}
             ]
-        }, {
+        },{
             stickyTracking: false,
             index:1,
+            visible: false,
             regression: true ,
             regressionSettings: {
+                active: false,//here
                 dashStyle:"LongDash",
                 type: 'polynomial',
                 name: 'Av. power trend (W)',
