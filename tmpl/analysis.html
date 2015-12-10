@@ -384,7 +384,7 @@ $(function () {
             title: {
                 text: 'Av. Watts / bpm / rpm / %'
             },
-            min: 40,
+            min: 60,
             startOnTick: false
         }
         {{if .Filter.ShowCPs}}
@@ -392,6 +392,7 @@ $(function () {
             title: {
                 text: selectedCP + ' Critical Power (Watts)',
             },
+            min: 100,
             opposite: true
         }
         {{end}}
@@ -617,7 +618,7 @@ $(function () {
             verticalAlign: 'top',
             y: 100,
             floating: true,
-            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'
+            backgroundColor: '#FFFFFF'
         },
         series: [{
             name: 'Total Training load',
@@ -927,7 +928,7 @@ $(function () {
             </script>
         </div>
         {{end}}
-        <div id="hvp-graph" class="chart" style="min-width: 310px; height: 600px; margin: 0 auto 15px"></div>
+        <div id="hvp-graph" class="chart" style="min-width: 310px; height: 700px; margin: 0 auto 15px"></div>
     </section>
     <hr>
     {{end}} 
