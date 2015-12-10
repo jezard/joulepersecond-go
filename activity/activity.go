@@ -292,8 +292,13 @@ func ActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 				///omit from performance chart?
 				omitFromPC := r.FormValue("omit-from-pc")
-				if omitFromPC != "" && user.Demo == false {
+				if omitFromPC != "" {
 					meta.OmitFromPC = true
+				} else {
+					meta.OmitFromPC = false
+				}
+
+				if user.Demo == false {
 					//add/update the database with the new values
 					if err := session.Query(`INSERT INTO activity_meta (activity_id, omit_from_pc ) VALUES (?, ?)`,
 						activityId, meta.OmitFromPC).Exec(); err != nil {
