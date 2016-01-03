@@ -2,8 +2,10 @@ package utility
 
 import (
 	"crypto/rc4"
+	//"fmt"
 	"github.com/jezard/joulepersecond-go/conf"
 	"math"
+	"strings"
 )
 
 func Dostuff() string {
@@ -32,6 +34,7 @@ func Decode(enc_user_id string) (string, error) {
 	if enc_user_id == "unknown" {
 		return "", nil
 	}
+	enc_user_id = strings.Replace(enc_user_id, "♥", "/", -1)
 
 	// decode our encoded user_id
 	c, err := rc4.NewCipher([]byte(config.Cypher)) //our cipher
