@@ -146,8 +146,14 @@ func AnalysisHandler(w http.ResponseWriter, r *http.Request) {
 
 	urlpath := r.URL.Path[1:] //get the path (after the domain:port slash)/eg view/activity/ActIviTyiD
 	urlparts := strings.Split(urlpath, "/")
-	encoded_user_id, _ := url.QueryUnescape(urlparts[1])
-	user, _ = Usersettings.Get(encoded_user_id)
+
+	access_token, err := url.QueryUnescape(urlparts[1])
+
+	if err != nil {
+		fmt.Printf(" Error: %v\n", err)
+	}
+
+	user, _ = Usersettings.Get(access_token)
 
 	if urlpath == "favicon.ico" {
 		http.NotFound(w, r)

@@ -113,8 +113,14 @@ func ActivityHandler(w http.ResponseWriter, r *http.Request) {
 				defer session.Close()
 
 				activityId := urlparts[2] //get the encoded id
-				encoded_user_id, _ := url.QueryUnescape(urlparts[3])
-				user, _ := Usersettings.Get(encoded_user_id)
+				access_token, err := url.QueryUnescape(urlparts[3])
+
+				if err != nil {
+					fmt.Printf(" Error: %v\n", err)
+				}
+				err = nil
+
+				user, _ := Usersettings.Get(access_token)
 				filename := urlparts[4]
 
 				if user.Demo != false {
@@ -126,10 +132,11 @@ func ActivityHandler(w http.ResponseWriter, r *http.Request) {
 				//remove all traces of activity
 				//deleting this on is a bit more tricky because of keys... so to get the start time of the acitivity, we'll use the first trackpoint timestamp, as this is equal to it and we can access that.
 				var timestamp time.Time
-				if err := session.Query(`SELECT tp_timestamp from joulepersecond.activity_data where activity_id = ? ORDER BY tp_timestamp ASC LIMIT 1`, activityId).Scan(&timestamp); err != nil {
+				var lapstart time.Time
+				if err := session.Query(`SELECT tp_timestamp, lap_start from joulepersecond.activity_data where activity_id = ? ORDER BY tp_timestamp ASC LIMIT 1`, activityId).Scan(&timestamp, &lapstart); err != nil {
 					log.Printf("1: %v", err)
 				}
-				if err := session.Query(`DELETE FROM user_activity WHERE user_id = ? AND activity_start = ?`, user.Id, timestamp).Exec(); err != nil {
+				if err := session.Query(`DELETE FROM user_activity WHERE user_id = ? AND activity_start = ?`, user.Id, lapstart).Exec(); err != nil {
 					log.Printf("2: %v", err)
 				}
 				//these are easier...
@@ -144,7 +151,7 @@ func ActivityHandler(w http.ResponseWriter, r *http.Request) {
 				}
 
 				//delete the file
-				err := os.Remove(config.UploadDir + filename)
+				err = os.Remove(config.UploadDir + filename)
 				if err != nil {
 					url_err := errors.New("The selected activity was not fully deleted.")
 					http.Error(w, url_err.Error(), http.StatusInternalServerError)
@@ -160,8 +167,8 @@ func ActivityHandler(w http.ResponseWriter, r *http.Request) {
 				session, _ := cluster.CreateSession()
 				defer session.Close()
 
-				encoded_user_id, _ := url.QueryUnescape(urlparts[3])
-				user, _ := Usersettings.Get(encoded_user_id)
+				access_token, _ := url.QueryUnescape(urlparts[3])
+				user, _ := Usersettings.Get(access_token)
 
 				activityId := urlparts[2] //get the encoded id
 
@@ -180,8 +187,14 @@ func ActivityHandler(w http.ResponseWriter, r *http.Request) {
 			break
 		case "view":
 
-			encoded_user_id, err := url.QueryUnescape(urlparts[3])
-			user, err := Usersettings.Get(encoded_user_id)
+			access_token, err := url.QueryUnescape(urlparts[3])
+
+			if err != nil {
+				fmt.Printf(" Error: %v\n", err)
+			}
+			err = nil
+
+			user, err := Usersettings.Get(access_token)
 
 			theme, err := r.Cookie("theme")
 			if err != nil {

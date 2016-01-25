@@ -1,11 +1,8 @@
 package utility
 
 import (
-	"crypto/rc4"
-	//"fmt"
 	"github.com/jezard/joulepersecond-go/conf"
 	"math"
-	"strings"
 )
 
 func Dostuff() string {
@@ -27,28 +24,4 @@ func Round(val float64, roundOn float64, places int) (newVal float64) {
 	}
 	newVal = round / pow
 	return
-}
-
-func Decode(enc_user_id string) (string, error) {
-	// if user not known..
-	if enc_user_id == "unknown" {
-		return "", nil
-	}
-	enc_user_id = strings.Replace(enc_user_id, "♥", "/", -1)
-
-	// decode our encoded user_id
-	c, err := rc4.NewCipher([]byte(config.Cypher)) //our cipher
-	var src []byte
-	src = make([]byte, len(enc_user_id)) //not sure if this will work with foreign e.g. chinese or arabic email addresses
-	copy(src, enc_user_id)
-
-	c.XORKeyStream(src, src)
-	tmp := make([]byte, len(src))
-	for i := 0; i < len(src); i++ {
-		tmp[i] = src[i]
-	}
-
-	user_id := string(tmp)
-	return user_id, err
-
 }

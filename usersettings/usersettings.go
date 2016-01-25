@@ -7,7 +7,6 @@ import (
 	_ "github.com/go-sql-driver/mysql" //go get github.com/go-sql-driver/mysql
 	"github.com/jezard/joulepersecond-go/conf"
 	"github.com/jezard/joulepersecond-go/types"
-	"github.com/jezard/joulepersecond-go/utility"
 	"net/url"
 	"strings"
 	"time"
@@ -16,15 +15,18 @@ import (
 func Get(enc_uid string) (user types.UserSettings, _err error) {
 	conf := conf.Configuration()
 
+	db, err := sql.Open("mysql", conf.MySQLUser+":"+conf.MySQLPass+"@tcp("+conf.MySQLHost+":3306)/"+conf.MySQLDB)
+
+	var uid string
+	err = db.QueryRow("SELECT email FROM user WHERE access_token=? LIMIT 1", enc_uid).Scan(&uid)
+
 	//get the decoded user email (id)
-	uid, err := utility.Decode(enc_uid)
+	//uid, err := utility.Decode(enc_uid)
 
 	if uid == "" {
 		uid = conf.DemoUser
 		user.Demo = true
 	}
-
-	db, err := sql.Open("mysql", conf.MySQLUser+":"+conf.MySQLPass+"@tcp("+conf.MySQLHost+":3306)/"+conf.MySQLDB)
 
 	var paid_account bool
 	var my_ftp, my_thr, my_rhr, my_weight, set_ncp_rolloff, my_age, set_data_cutoff, id int
