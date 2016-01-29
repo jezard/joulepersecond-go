@@ -260,12 +260,23 @@ $(function () {
         tooltip: {
             headerFormat: '<b>{series.name}</b><br>',
             pointFormat: '{point.x:%e. %b}: {point.y:.2f}',
+            positioner: function (labelWidth, labelHeight, point) {
+                var tooltipY;
+                tooltipY = point.plotY + 20;
+                return {
+                    x: 40,
+                    y: tooltipY
+                };
+            },
+            shadow: false,
+            borderWidth: 0,
             crosshairs: [false, true]
         },
 
         series: [{
             type: 'column',
             color: '#dddddd',
+            visible: false,
             name: 'Perceived Effort',
             marker: {
                     enabled: false
@@ -276,6 +287,7 @@ $(function () {
         }, {
             type: 'column',
             color: '#eeeeee',
+            visible: false,
             name: 'Motivation Level',
             marker: {
                     enabled: false
@@ -333,6 +345,7 @@ $(function () {
         , {
             type: 'scatter',
             name: 'Notable Critial Power Performance',
+            visible: false,
             yAxis: 2,
             data: [
                 {{range $ffdata := .FfData}}{{if $ffdata.HasValue}}[Date.UTC({{$ffdata.Year}},{{$ffdata.Month}},{{$ffdata.Day}}),{{$ffdata.NotableCp}}],{{end}}{{end}}
@@ -400,6 +413,21 @@ $(function () {
         tooltip: {
             headerFormat: '<b>{series.name}</b><br>',
             pointFormat: '{point.x:%e. %b}: {point.y:.2f}',
+            positioner: function (labelWidth, labelHeight, point) {
+                var tooltipX, tooltipY;
+                if (point.plotX + labelWidth > chart.plotWidth) {
+                    tooltipX = point.plotX + chart.plotLeft - labelWidth - 20;
+                } else {
+                    tooltipX = point.plotX + chart.plotLeft + 20;
+                }
+                tooltipY = point.plotY + chart.plotTop - 20;
+                return {
+                    x: tooltipX,
+                    y: tooltipY
+                };
+            },
+            shadow: false,
+            borderWidth: 0,
             crosshairs: [false, true]
             {{if .Filter.ShowCPs}}
             ,formatter: function() {
@@ -610,15 +638,6 @@ $(function () {
         tooltip: {
             shared: true,
             crosshairs: [false, true]
-        },
-        legend: {
-            layout: 'vertical',
-            align: 'left',
-            x: 120,
-            verticalAlign: 'top',
-            y: 100,
-            floating: true,
-            backgroundColor: '#FFFFFF'
         },
         series: [{
             name: 'Total Training load',
