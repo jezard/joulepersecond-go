@@ -198,7 +198,7 @@ func ActivityHandler(w http.ResponseWriter, r *http.Request) {
 
 			theme, err := r.Cookie("theme")
 			if err != nil {
-				user.Theme = "green"
+				user.Theme = "gray"
 			} else {
 				user.Theme = theme.Value
 			}
