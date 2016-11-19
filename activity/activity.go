@@ -165,7 +165,6 @@ func ActivityHandler(w http.ResponseWriter, r *http.Request) {
 				cluster := gocql.NewCluster(config.DbHost)
 				cluster.Keyspace = "joulepersecond"
 				cluster.Consistency = gocql.Quorum
-				cluster.ProtoVersion = 3
 				session, _ := cluster.CreateSession()
 				defer session.Close()
 
@@ -209,7 +208,6 @@ func ActivityHandler(w http.ResponseWriter, r *http.Request) {
 				cluster := gocql.NewCluster(config.DbHost)
 				cluster.Keyspace = "joulepersecond"
 				cluster.Consistency = gocql.Quorum
-				cluster.ProtoVersion = 3
 				session, _ := cluster.CreateSession()
 				defer session.Close()
 
@@ -350,7 +348,6 @@ func processCQLfile(filename string) {
 	cluster := gocql.NewCluster(config.DbHost)
 	cluster.Keyspace = "joulepersecond"
 	cluster.Consistency = gocql.Quorum
-	cluster.ProtoVersion = 3
 	session, _ := cluster.CreateSession()
 	defer session.Close()
 
@@ -375,7 +372,6 @@ func getResults(activityId string) []map[string]interface{} {
 	cluster := gocql.NewCluster(config.DbHost)
 	cluster.Keyspace = "joulepersecond"
 	cluster.Consistency = gocql.Quorum
-	cluster.ProtoVersion = 3
 	session, _ := cluster.CreateSession()
 	defer session.Close()
 
@@ -392,7 +388,6 @@ func saveProcessed(user types.UserSettings, activityId, title string, row_json, 
 	cluster := gocql.NewCluster(config.DbHost)
 	cluster.Keyspace = "joulepersecond"
 	cluster.Consistency = gocql.Quorum
-	cluster.ProtoVersion = 3
 	session, _ := cluster.CreateSession()
 	defer session.Close()
 
@@ -410,7 +405,6 @@ func getPreProcessed(activityId string) (title string, row_json, power_json, hea
 	cluster := gocql.NewCluster(config.DbHost)
 	cluster.Keyspace = "joulepersecond"
 	cluster.Consistency = gocql.Quorum
-	cluster.ProtoVersion = 3
 	session, _ := cluster.CreateSession()
 	defer session.Close()
 
