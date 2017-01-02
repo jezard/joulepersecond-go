@@ -21,6 +21,7 @@
 <script src="http://joulepersecond.com/js/highcharts/highcharts-more.js"></script>
 <script src="http://joulepersecond.com/js/highcharts/modules/solid-gauge.src.js"></script>
 <script src="http://joulepersecond.com/js/highcharts/highcharts-regression.js"></script>
+<script src="http://joulepersecond.com/js/highcharts/technical-indicators.src.js"></script>
 
 <script src="http://joulepersecond.com/js/highcharts/modules/exporting.js"></script>
 
@@ -366,6 +367,9 @@ $(function () {
     * Heart vs Power :: Performance chart
     * 
     **/
+    var activityCountStr = "{{range .HvpData}}1{{end}}";
+    var activityCount = activityCountStr.length;
+
     cloneToolTip = null;
     var container = document.getElementById("hvp-graph");
 
@@ -454,17 +458,10 @@ $(function () {
 
         series: [
         {
+            id: 'hvp-ratio',
+            visible: false,
             stickyTracking: false,
             index:0,
-            regression: true ,
-            regressionSettings: {
-                type: 'polynomial',
-                dashStyle:"LongDash",
-                name: 'BPM to W ratio trend (%)',
-                color: linecolors[0],
-                index: -1,
-                states: {hover:{enabled: false}}
-            },
             name: 'BPM to W ratio %',
             marker: {
                 radius: 3
@@ -477,6 +474,23 @@ $(function () {
                 {{range $hvpdata := .HvpData}}[Date.UTC({{$hvpdata.Year}},{{$hvpdata.Month}},{{$hvpdata.Day}}), {{$hvpdata.AvPower}}/{{$hvpdata.AvHeartRate}}*100],{{end}}
             ]
         }, {
+            name: 'BPM to W ratio % last ' +  (((Math.round(activityCount / 2.5)) > 5) ? 5 : Math.round(activityCount / 2.5)) + ' activities SMA*',
+            linkedTo: 'hvp-ratio',
+            showInLegend: true,
+            type: 'trendline',
+            algorithm: 'SMA',
+            periods: (((Math.round(activityCount / 2.5)) > 5) ? 5 : Math.round(activityCount / 2.5))
+
+        }, {
+            name: 'BPM to W ratio % last ' +  Math.round(activityCount / 5) + ' activities SMA*',
+            linkedTo: 'hvp-ratio',
+            showInLegend: true,
+            type: 'trendline',
+            algorithm: 'SMA',
+            periods: Math.round(activityCount / 5)
+
+        }, {
+            id: 'hvp-hr',
             stickyTracking: false,
             index:0,
             visible: false,
@@ -501,13 +515,30 @@ $(function () {
             data: [
                 {{range $hvpdata := .HvpData}}[Date.UTC({{$hvpdata.Year}},{{$hvpdata.Month}},{{$hvpdata.Day}}),{{$hvpdata.AvHeartRate}}],{{end}}
             ]
-        },{
-            stickyTracking: false,
-            index:1,
+        }, {
+            name: 'Heart rate last ' +  (((Math.round(activityCount / 2.5)) > 5) ? 5 : Math.round(activityCount / 2.5)) + ' activities SMA*',
+            linkedTo: 'hvp-hr',
+            showInLegend: true,
+            type: 'trendline',
+            algorithm: 'SMA',
+            visible: false,
+            periods: (((Math.round(activityCount / 2.5)) > 5) ? 5 : Math.round(activityCount / 2.5))
+
+        }, {
+            name: 'Heart rate last ' +  Math.round(activityCount / 5) + ' activities SMA*',
+            linkedTo: 'hvp-hr',
+            showInLegend: true,
+            type: 'trendline',
+            algorithm: 'SMA',
+            visible: false,
+            periods: Math.round(activityCount / 5)
+
+        }, {
+            id: 'hvp-power',
             visible: false,
             regression: true ,
             regressionSettings: {
-                visible: false,//here
+                visible: true,//here
                 dashStyle:"LongDash",
                 type: 'polynomial',
                 name: 'Av. power trend (W)',
@@ -523,17 +554,28 @@ $(function () {
                 {{range $hvpdata := .HvpData}}[Date.UTC({{$hvpdata.Year}},{{$hvpdata.Month}},{{$hvpdata.Day}}),{{$hvpdata.AvPower}}],{{end}}
             ]
         }, {
+            name: 'Power W last ' +  (((Math.round(activityCount / 2.5)) > 5) ? 5 : Math.round(activityCount / 2.5)) + ' activities SMA*',
+            linkedTo: 'hvp-power',
+            showInLegend: true,
+            type: 'trendline',
+            algorithm: 'SMA',
+            visible: false,
+            periods: (((Math.round(activityCount / 2.5)) > 5) ? 5 : Math.round(activityCount / 2.5))
+
+        }, {
+            name: 'Power W last ' +  Math.round(activityCount / 5) + ' activities SMA*',
+            linkedTo: 'hvp-power',
+            showInLegend: true,
+            type: 'trendline',
+            algorithm: 'SMA',
+            visible: false,
+            periods: Math.round(activityCount / 5)
+
+        }, {
+            id: 'hvp-cad',
             stickyTracking: false,
             index:2,
-            regression: true ,
-            regressionSettings: {
-                dashStyle:"LongDash",
-                type: 'polynomial',
-                name: 'Av. cadence trend (rpm)',
-                color: linecolors[2],
-                index: -3,
-                states: {hover:{enabled: false}}
-            },
+            visible: false,
             name: 'Av. cadence (rpm)',
             marker: {
                 radius: 3
@@ -541,6 +583,24 @@ $(function () {
             data: [
                 {{range $hvpdata := .HvpData}}[Date.UTC({{$hvpdata.Year}},{{$hvpdata.Month}},{{$hvpdata.Day}}),{{$hvpdata.AvCadence}}],{{end}}
             ]
+        }, {
+            name: 'Cadence last ' +  (((Math.round(activityCount / 2.5)) > 5) ? 5 : Math.round(activityCount / 2.5)) + ' activities SMA*',
+            linkedTo: 'hvp-cad',
+            showInLegend: true,
+            type: 'trendline',
+            algorithm: 'SMA',
+            visible: false,
+            periods: (((Math.round(activityCount / 2.5)) > 5) ? 5 : Math.round(activityCount / 2.5))
+
+        }, {
+            name: 'Cadence last ' +  Math.round(activityCount / 5) + ' activities SMA*',
+            linkedTo: 'hvp-cad',
+            showInLegend: true,
+            type: 'trendline',
+            algorithm: 'SMA',
+            visible: false,
+            periods: Math.round(activityCount / 5)
+
         }
         {{if .Filter.ShowCPs}}//http://jsfiddle.net/japanick/dWDE6/314/
         , {
@@ -948,6 +1008,7 @@ $(function () {
         </div>
         {{end}}
         <div id="hvp-graph" class="chart" style="min-width: 310px; height: 700px; margin: 0 auto 15px"></div>
+        <div style="text-align: center"><p>* Simple Moving Average</p></div>
     </section>
     <hr>
     {{end}} 
